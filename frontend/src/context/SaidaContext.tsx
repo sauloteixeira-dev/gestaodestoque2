@@ -1,8 +1,11 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
-import axios, { AxiosError } from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import { toast } from 'react-toastify';
 
-const API_URL = 'http://localhost:3001';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 interface LocalSaida {
   id: number;
@@ -49,18 +52,49 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const fetchLocais = async () => {
     try {
-      const response = await axios.get<LocalSaida[]>(`${API_URL}/locais-saida`);
-      setLocais(response.data);
-    } catch (error) {
+      const { data, error } = await supabase
+        .from('locais_saida')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setLocais(data || []);
+    } catch (error: any) {
+      console.error('Erro ao buscar locais:', error);
       toast.error('Erro ao buscar locais de saída.');
     }
   };
 
   const fetchSaidas = async () => {
     try {
-      const response = await axios.get<SaidaEstoque[]>(`${API_URL}/saidas-estoque`);
-      setSaidas(response.data);
-    } catch (error) {
+      const { data, error } = await supabase
+        .from('saidas_estoque')
+        .select(`
+          *,
+          local:locais_saida(nome),
+          itens:saidas_estoque_itens(
+            *,
+            produto:produtos(nome, codigo_barras)
+          )
+        `)
+        .order('data_saida', { ascending: false });
+      
+      if (error) throw error;
+      
+      // Processar dados para o formato esperado
+      const processedData = (data || []).map(saida => ({
+        ...saida,
+        itens: saida.itens?.map((item: any) => ({
+          produto_nome: item.produto?.nome || 'Produto não encontrado',
+          produto_codigo_barras: item.produto?.codigo_barras || 'N/A',
+          quantidade: item.quantidade,
+          produto_quantidade_antes: item.quantidade_antes || 0
+        })) || []
+      }));
+      
+      setSaidas(processedData);
+    } catch (error: any) {
+      console.error('Erro ao buscar saídas:', error);
       toast.error('Erro ao buscar histórico de saídas.');
     }
   };
@@ -76,12 +110,17 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const adicionarLocal = async (nome: string, descricao?: string) => {
     try {
-      await axios.post(`${API_URL}/locais-saida`, { nome, descricao });
+      const { error } = await supabase
+        .from('locais_saida')
+        .insert({ nome, descricao });
+      
+      if (error) throw error;
+      
       await fetchLocais();
       toast.success('Local adicionado com sucesso!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ error: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Erro desconhecido ao adicionar local.';
+    } catch (error: any) {
+      console.error('Erro ao adicionar local:', error);
+      const errorMessage = error.message || 'Erro desconhecido ao adicionar local.';
       toast.error(errorMessage);
       throw error;
     }
@@ -89,12 +128,34 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const registrarSaida = async (local_id: number, usuario_retirada: string, itens: ItemSaida[], observacoes?: string) => {
     try {
-      await axios.post(`${API_URL}/saidas-estoque`, { local_id, usuario_retirada, itens, observacoes });
+      // Primeiro, criar a saída principal
+      const { data: saidaData, error: saidaError } = await supabase
+        .from('saidas_estoque')
+        .insert({ local_id, usuario_retirada, observacoes })
+        .select()
+        .single();
+      
+      if (saidaError) throw saidaError;
+      
+      // Depois, adicionar os itens
+      const itensParaInserir = itens.map(item => ({
+        saida_id: saidaData.id,
+        produto_id: item.produto_id,
+        quantidade: item.quantidade,
+        quantidade_antes: 0 // Será atualizado depois
+      }));
+      
+      const { error: itensError } = await supabase
+        .from('saidas_estoque_itens')
+        .insert(itensParaInserir);
+      
+      if (itensError) throw itensError;
+      
       await Promise.all([fetchLocais(), fetchSaidas()]);
       toast.success('Saída registrada com sucesso!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ error: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Erro desconhecido ao registrar saída.';
+    } catch (error: any) {
+      console.error('Erro ao registrar saída:', error);
+      const errorMessage = error.message || 'Erro desconhecido ao registrar saída.';
       toast.error(errorMessage);
       throw error;
     }

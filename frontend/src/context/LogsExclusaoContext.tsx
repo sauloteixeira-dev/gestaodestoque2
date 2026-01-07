@@ -1,8 +1,11 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import { toast } from 'react-toastify';
 
-const API_URL = 'http://localhost:3001';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 interface LogExclusao {
   id: number;
@@ -29,9 +32,15 @@ export const LogsExclusaoProvider: React.FC<{ children: ReactNode }> = ({ childr
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<LogExclusao[]>(`${API_URL}/logs-exclusao`);
-      setLogs(response.data);
-    } catch (error) {
+      const { data, error } = await supabase
+        .from('logs_exclusao')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setLogs(data || []);
+    } catch (error: any) {
+      console.error('Erro ao buscar logs:', error);
       toast.error('Erro ao buscar logs de exclusão.');
     } finally {
       setLoading(false);
