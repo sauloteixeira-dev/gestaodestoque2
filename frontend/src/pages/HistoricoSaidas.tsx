@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useSaida } from '../context/SaidaContext';
+import { type SaidaEstoque } from '../types';
 
 
 const HistoricoSaidas: React.FC = () => {
   const { saidas, loading } = useSaida();
-  const [saidaSelecionada, setSaidaSelecionada] = useState<any>(null);
+  const [saidaSelecionada, setSaidaSelecionada] = useState<SaidaEstoque | null>(null);
 
   const formatarData = (dataString: string) => {
     return new Date(dataString).toLocaleString('pt-BR');
   };
 
-  const gerarDocumento = (saida: any) => {
+  const gerarDocumento = (saida: SaidaEstoque) => {
     console.log('Dados da saída selecionada:', saida);
     console.log('Itens da saída:', saida.itens);
     setSaidaSelecionada(saida);
@@ -114,7 +115,7 @@ const HistoricoSaidas: React.FC = () => {
                   </thead>
                   <tbody>
                     {saidaSelecionada.itens && saidaSelecionada.itens.length > 0 ? (
-                      saidaSelecionada.itens.map((item: any, index: number) => (
+                      saidaSelecionada.itens.map((item, index) => (
                         <tr key={index}>
                           <td>{item.produto_nome}</td>
                           <td style={{ display: 'none' }}>{item.produto_codigo_barras}</td>

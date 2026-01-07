@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
+import { type Produto } from '../types';
 
 
 const Estoque: React.FC = () => {
   const { produtos, loading, darBaixaEstoque, darEntradaEstoque, excluirProduto } = useProdutos();
-  const [produtoParaExcluir, setProdutoParaExcluir] = useState<any>(null);
+  const [produtoParaExcluir, setProdutoParaExcluir] = useState<Produto | null>(null);
 
   if (loading) {
     return <p>Carregando estoque...</p>;
   }
 
-  const handleExcluirClick = (produto: any) => {
+  const handleExcluirClick = (produto: Produto) => {
     setProdutoParaExcluir(produto);
   };
 

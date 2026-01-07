@@ -1,16 +1,8 @@
-import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
 
-interface LogExclusao {
-  id: number;
-  produto_id: number;
-  produto_nome: string;
-  produto_codigo_barras: string;
-  produto_quantidade: number;
-  data_exclusao: string;
-  usuario_exclusao: string;
-}
+import { type LogExclusao } from '../types';
 
 interface LogsExclusaoContextData {
   logs: LogExclusao[];
@@ -24,7 +16,7 @@ export const LogsExclusaoProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [logs, setLogs] = useState<LogExclusao[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -40,11 +32,11 @@ export const LogsExclusaoProvider: React.FC<{ children: ReactNode }> = ({ childr
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [fetchLogs]);
 
   return (
     <LogsExclusaoContext.Provider value={{ logs, loading, refreshLogs: fetchLogs }}>

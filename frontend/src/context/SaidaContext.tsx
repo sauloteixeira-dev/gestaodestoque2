@@ -2,32 +2,7 @@ import React, { createContext, useState, useContext, useEffect, type ReactNode }
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
 
-interface LocalSaida {
-  id: number;
-  nome: string;
-  descricao?: string;
-  data_criacao: string;
-}
-
-interface ItemSaida {
-  produto_id: number;
-  quantidade: number;
-}
-
-interface SaidaEstoque {
-  id: number;
-  local_id: number;
-  usuario_retirada: string;
-  data_saida: string;
-  observacoes?: string;
-  local?: { nome: string };
-  itens?: {
-    produto_nome: string;
-    produto_codigo_barras: string;
-    quantidade: number;
-    produto_quantidade_antes: number;
-  }[];
-}
+import { type LocalSaida, type SaidaEstoque, type ItemSaida } from '../types';
 
 interface SaidaContextData {
   locais: LocalSaida[];

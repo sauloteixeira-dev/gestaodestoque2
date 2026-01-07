@@ -1,23 +1,13 @@
 import React, { useEffect } from 'react';
 import { useLogsExclusao } from '../context/LogsExclusaoContext';
-
-
-interface LogExclusao {
-  id: number;
-  produto_id: number;
-  produto_nome: string;
-  produto_codigo_barras: string;
-  produto_quantidade: number;
-  data_exclusao: string;
-  usuario_exclusao: string;
-}
+import { type LogExclusao } from '../types';
 
 const LogsExclusao: React.FC = () => {
   const { logs, loading, refreshLogs } = useLogsExclusao();
 
   useEffect(() => {
     refreshLogs();
-  }, []); // Array vazio para executar apenas uma vez
+  }, [refreshLogs]);
 
   const formatarData = (dataString: string) => {
     const data = new Date(dataString);

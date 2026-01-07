@@ -2,12 +2,7 @@ import React, { createContext, useState, useContext, useEffect, type ReactNode }
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
 
-interface Produto {
-  id: number;
-  codigo_barras: string;
-  nome: string;
-  quantidade: number;
-}
+import { type Produto } from '../types';
 
 interface ProdutoContextData {
   produtos: Produto[];

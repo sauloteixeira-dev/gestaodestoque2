@@ -32,7 +32,7 @@ const SaidaEstoque: React.FC = () => {
     }
 
     const itens = Object.entries(itensSelecionados)
-      .filter(([_, quantidade]) => quantidade > 0)
+      .filter(([, quantidade]) => quantidade > 0)
       .map(([produtoId, quantidade]) => ({
         produto_id: parseInt(produtoId),
         quantidade
@@ -49,7 +49,7 @@ const SaidaEstoque: React.FC = () => {
       setUsuario('');
       setObservacoes('');
       setItensSelecionados({});
-    } catch (error) {
+    } catch {
       // Erro já tratado no contexto
     }
   };
