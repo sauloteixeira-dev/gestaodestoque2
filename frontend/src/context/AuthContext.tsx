@@ -26,22 +26,27 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   useEffect(() => {
     let isMounted = true;
 
+    // Timeout de segurança: 3 segundos para evitar travamento
+    const safetyTimeout = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('[Auth] Timeout de segurança atingido, liberando loading...');
+        setLoading(false);
+      }
+    }, 3000);
+
     // Verificação rápida e assíncrona
     const initAuth = async () => {
       try {
-        // Apenas getSession - mais rápido que getSession + getUser
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (!isMounted) return;
 
         if (error || !session?.user) {
-          // Sem sessão válida - liberar loading imediatamente
           setUser(null);
           setLoading(false);
           return;
         }
 
-        // Sessão existe - carregar perfil
         await loadUserProfile(session.user.id);
       } catch (error) {
         console.error('Erro ao verificar autenticação:', error);
@@ -55,7 +60,6 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
 
     initAuth();
 
-    // Listener para mudanças de auth
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       if (!isMounted) return;
 
@@ -75,6 +79,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
 
     return () => {
       isMounted = false;
+      clearTimeout(safetyTimeout);
       authListener.subscription.unsubscribe();
     };
   }, []);
