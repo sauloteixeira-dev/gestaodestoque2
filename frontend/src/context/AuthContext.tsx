@@ -24,15 +24,8 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Timeout de segurança: se não carregar em 10 segundos, para de carregar
-    const timeout = setTimeout(() => {
-      console.warn('Timeout ao carregar autenticação, parando loading...');
-      setLoading(false);
-    }, 10000);
-
-    checkUser().finally(() => {
-      clearTimeout(timeout);
-    });
+    // Verificação rápida de autenticação sem timeout bloqueante
+    checkUser();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
       if (session?.user) {
@@ -40,10 +33,10 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
       } else {
         setUser(null);
       }
+      setLoading(false);
     });
 
     return () => {
-      clearTimeout(timeout);
       authListener.subscription.unsubscribe();
     };
   }, []);

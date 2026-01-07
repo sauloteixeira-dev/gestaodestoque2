@@ -47,21 +47,39 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const fetchLocais = async () => {
     try {
+      console.log('[SaidaContext] Buscando locais de saída...');
       const { data, error } = await supabase
         .from('locais_saida')
         .select('*')
         .order('data_criacao', { ascending: false });
-      
-      if (error) throw error;
+
+      if (error) {
+        console.error('[SaidaContext] Erro na query locais_saida:', error);
+        console.error('[SaidaContext] Código do erro:', error.code);
+        console.error('[SaidaContext] Mensagem:', error.message);
+        console.error('[SaidaContext] Detalhes:', error.details);
+        throw error;
+      }
+
+      console.log('[SaidaContext] Locais carregados:', data?.length || 0);
       setLocais(data || []);
     } catch (error: any) {
-      console.error('Erro ao buscar locais:', error);
-      toast.error('Erro ao buscar locais de saída.');
+      console.error('[SaidaContext] Erro ao buscar locais:', error);
+      // Não exibir toast se a tabela não existir - provável configuração inicial
+      if (error.code === '42P01') {
+        console.warn('[SaidaContext] Tabela locais_saida não existe. Execute o script fix_database.sql no Supabase.');
+      } else if (error.code === 'PGRST301') {
+        console.warn('[SaidaContext] Erro de permissão RLS. Verifique as políticas no Supabase.');
+        toast.error('Erro de permissão ao acessar locais de saída.');
+      } else {
+        toast.error('Não foi possível carregar os locais de saída.');
+      }
     }
   };
 
   const fetchSaidas = async () => {
     try {
+      console.log('[SaidaContext] Buscando histórico de saídas...');
       const { data, error } = await supabase
         .from('saidas_estoque')
         .select(`
@@ -73,9 +91,16 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           )
         `)
         .order('data_saida', { ascending: false });
-      
-      if (error) throw error;
-      
+
+      if (error) {
+        console.error('[SaidaContext] Erro na query saidas_estoque:', error);
+        console.error('[SaidaContext] Código do erro:', error.code);
+        console.error('[SaidaContext] Mensagem:', error.message);
+        throw error;
+      }
+
+      console.log('[SaidaContext] Saídas carregadas:', data?.length || 0);
+
       // Processar dados para o formato esperado
       const processedData = (data || []).map(saida => ({
         ...saida,
@@ -86,11 +111,13 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           produto_quantidade_antes: item.quantidade_antes || 0
         })) || []
       }));
-      
+
       setSaidas(processedData);
     } catch (error: any) {
-      console.error('Erro ao buscar saídas:', error);
-      toast.error('Erro ao buscar histórico de saídas.');
+      console.error('[SaidaContext] Erro ao buscar saídas:', error);
+      if (error.code !== '42P01') {
+        toast.error('Erro ao buscar histórico de saídas.');
+      }
     }
   };
 
@@ -108,9 +135,9 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const { error } = await supabase
         .from('locais_saida')
         .insert({ nome, descricao });
-      
+
       if (error) throw error;
-      
+
       await fetchLocais();
       toast.success('Local adicionado com sucesso!');
     } catch (error: any) {
@@ -129,9 +156,9 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         .insert({ local_id, usuario_retirada, observacoes })
         .select()
         .single();
-      
+
       if (saidaError) throw saidaError;
-      
+
       // Depois, adicionar os itens
       const itensParaInserir = itens.map(item => ({
         saida_id: saidaData.id,
@@ -139,13 +166,13 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         quantidade: item.quantidade,
         quantidade_antes: 0 // Será atualizado depois
       }));
-      
+
       const { error: itensError } = await supabase
         .from('itens_saida')
         .insert(itensParaInserir);
-      
+
       if (itensError) throw itensError;
-      
+
       await Promise.all([fetchLocais(), fetchSaidas()]);
       toast.success('Saída registrada com sucesso!');
     } catch (error: any) {
