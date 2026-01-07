@@ -23,27 +23,6 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Limpar cache antigo para evitar conflitos de múltiplas instâncias
-  useEffect(() => {
-    // Limpar apenas chaves relacionadas ao Supabase para não afetar outros dados
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.includes('supabase')) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-    
-    // Limpar sessionStorage também
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const key = sessionStorage.key(i);
-      if (key && key.includes('supabase')) {
-        sessionStorage.removeItem(key);
-      }
-    }
-  }, []);
-
   useEffect(() => {
     // Timeout de segurança: se não carregar em 10 segundos, para de carregar
     const timeout = setTimeout(() => {
@@ -73,7 +52,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
     try {
       // Verificar se há uma sessão válida
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
+
       if (sessionError) {
         console.error('Erro ao obter sessão:', sessionError);
         // Limpar dados corrompidos
@@ -82,11 +61,11 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
         setLoading(false);
         return;
       }
-      
+
       if (session?.user) {
         // Verificar se a sessão ainda é válida
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
+
         if (userError || !user) {
           console.error('Sessão inválida, limpando...');
           localStorage.clear();
@@ -94,7 +73,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
           setLoading(false);
           return;
         }
-        
+
         await loadUserProfile(session.user.id);
       } else {
         setUser(null);
@@ -118,7 +97,7 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
 
       if (error) {
         console.error('Erro ao buscar perfil:', error);
-        
+
         // Se o perfil não existe, fazer logout
         if (error.code === 'PGRST116') {
           console.error('Perfil não encontrado, fazendo logout...');
@@ -127,10 +106,10 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
           setUser(null);
           return;
         }
-        
+
         throw error;
       }
-      
+
       if (data) {
         setUser(data);
       } else {
@@ -192,13 +171,13 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   const logout = async () => {
     try {
       setUser(null);
-      
+
       // Limpar localStorage
       localStorage.clear();
-      
+
       // Limpar sessionStorage
       sessionStorage.clear();
-      
+
       // Fazer logout no Supabase
       const { error } = await supabase.auth.signOut();
       if (error) {
