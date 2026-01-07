@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
-import { toast } from 'react-toastify';
 
 interface UserProfile {
   id: string;
