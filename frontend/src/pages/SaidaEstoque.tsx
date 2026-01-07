@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
-import './SaidaEstoque.css';
+
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();

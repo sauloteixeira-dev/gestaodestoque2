@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useLogsExclusao } from '../context/LogsExclusaoContext';
-import './LogsExclusao.css';
+
 
 interface LogExclusao {
   id: number;

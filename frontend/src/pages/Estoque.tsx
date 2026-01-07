@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
-import './Estoque.css';
+
 
 const Estoque: React.FC = () => {
   const { produtos, loading, darBaixaEstoque, darEntradaEstoque, excluirProduto } = useProdutos();

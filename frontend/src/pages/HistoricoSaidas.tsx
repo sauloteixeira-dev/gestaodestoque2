@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSaida } from '../context/SaidaContext';
-import './HistoricoSaidas.css';
+
 
 const HistoricoSaidas: React.FC = () => {
   const { saidas, loading } = useSaida();
@@ -28,7 +28,7 @@ const HistoricoSaidas: React.FC = () => {
     <div className="historico-saidas-container">
       <div className="card">
         <h2>Histórico de Saídas de Estoque</h2>
-        
+
         {saidas.length > 0 ? (
           <div className="saidas-list">
             {saidas.map(saida => (
@@ -39,20 +39,20 @@ const HistoricoSaidas: React.FC = () => {
                     <p>Usuário: {saida.usuario_retirada}</p>
                     <p>Data: {formatarData(saida.data_saida)}</p>
                   </div>
-                  <button 
+                  <button
                     onClick={() => gerarDocumento(saida)}
                     className="btn-gerar-doc"
                   >
                     📄 Gerar Documento
                   </button>
                 </div>
-                
+
                 {saida.observacoes && (
                   <div className="observacoes">
                     <strong>Observações:</strong> {saida.observacoes}
                   </div>
                 )}
-                
+
                 <div className="itens-saida">
                   <h4>Itens Retirados:</h4>
                   <ul>
@@ -82,7 +82,7 @@ const HistoricoSaidas: React.FC = () => {
               <h2>Documento de Saída</h2>
               <button onClick={fecharDocumento} className="btn-fechar">✕</button>
             </div>
-            
+
             <div className="documento-content">
               <div className="documento-info">
                 <div className="info-row">

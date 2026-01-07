@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
-import './CadastroProduto.css';
+
 
 const CadastroProduto: React.FC = () => {
   const { produtos, adicionarProduto, darEntradaEstoque } = useProdutos();

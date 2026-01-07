@@ -1,6 +1,6 @@
 import React from 'react';
 import { useProdutos } from '../context/ProdutoContext';
-import './Dashboard.css';
+
 
 const Dashboard: React.FC = () => {
   const { produtos, loading } = useProdutos();
