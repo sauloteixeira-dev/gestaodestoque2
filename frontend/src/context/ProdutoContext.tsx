@@ -11,6 +11,7 @@ interface ProdutoContextData {
   darBaixaEstoque: (produtoId: number, quantidadeBaixa: number) => Promise<void>;
   darEntradaEstoque: (produto: Produto, quantidadeEntrada: number) => Promise<void>;
   excluirProduto: (produtoId: number) => Promise<void>;
+  buscarProdutos: () => Promise<void>;
 }
 
 const ProdutoContext = createContext<ProdutoContextData>({} as ProdutoContextData);
@@ -154,7 +155,7 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
   };
 
   return (
-    <ProdutoContext.Provider value={{ produtos, loading, adicionarProduto, darBaixaEstoque, darEntradaEstoque, excluirProduto }}>
+    <ProdutoContext.Provider value={{ produtos, loading, adicionarProduto, darBaixaEstoque, darEntradaEstoque, excluirProduto, buscarProdutos: fetchProdutos }}>
       {children}
     </ProdutoContext.Provider>
   );

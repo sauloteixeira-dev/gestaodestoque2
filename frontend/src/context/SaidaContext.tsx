@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
+import { useProdutos } from './ProdutoContext';
 import { toast } from 'react-toastify';
 
 import { type LocalSaida, type SaidaEstoque, type ItemSaida } from '../types';
@@ -19,6 +20,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [locais, setLocais] = useState<LocalSaida[]>([]);
   const [saidas, setSaidas] = useState<SaidaEstoque[]>([]);
   const [loading, setLoading] = useState(true);
+  const { buscarProdutos } = useProdutos();
 
   const fetchLocais = async () => {
     try {
@@ -154,9 +156,23 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           produto_id: item.produto_id,
           produto_nome: produto?.nome || 'Produto não encontrado',
           produto_codigo_barras: produto?.codigo_barras || 'N/A',
-          quantidade: item.quantidade
+          quantidade: item.quantidade,
+          produto_quantidade_antes: produto?.quantidade || 0
         };
       });
+
+      // Dar baixa no estoque para cada item
+      for (const item of itens) {
+        const { error: baixaError } = await supabase.rpc('dar_baixa_estoque', {
+          p_produto_id: item.produto_id,
+          p_quantidade: item.quantidade
+        });
+
+        if (baixaError) {
+          console.error(`Erro ao dar baixa no produto ${item.produto_id}:`, baixaError);
+          throw new Error(`Erro ao dar baixa no estoque: ${baixaError.message}`);
+        }
+      }
 
       const { error: itensError } = await supabase
         .from('itens_saida')
@@ -164,7 +180,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       if (itensError) throw itensError;
 
-      await Promise.all([fetchLocais(), fetchSaidas()]);
+      await Promise.all([fetchLocais(), fetchSaidas(), buscarProdutos()]);
       toast.success('Saída registrada com sucesso!');
     } catch (error: any) {
       console.error('Erro ao registrar saída:', error);

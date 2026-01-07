@@ -546,6 +546,8 @@ li:hover {
   max-width: 100%;
   padding: 2rem;
   box-sizing: border-box;
+  align-items: center;
+  /* Centraliza itens filhos (formulário) horizontalmente */
 }
 
 .cadastro-form {
@@ -554,7 +556,9 @@ li:hover {
   gap: 2rem;
   width: 100%;
   max-width: 600px;
-  align-self: center;
+  /* align-self: center; Já coberto pelo align-items do pai, mas bom manter ou trocar por margin auto */
+  margin: 0 auto;
+  /* Reforço para centralização */
 }
 
 .form-group {
@@ -570,6 +574,19 @@ li:hover {
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Container Visual (Card) aumentado */
+.cadastro-produto-container .card {
+  width: 100%;
+  max-width: 1100px;
+  /* Aumentado conforme solicitado */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centraliza o formulário dentro do card */
+  margin: 0 auto;
+  /* Centraliza o próprio card se o container permitir */
 }
 
 .cadastro-produto-container .form-group input,
@@ -1973,4 +1990,241 @@ li:hover {
 .btn-save:disabled {
   background-color: #93c5fd;
   cursor: not-allowed;
+}
+
+/* =========================================
+   ESTILOS RESPONSIVOS (MOBILE TABLET)
+   ========================================= */
+
+/* Botão Menu Hambúrguer (Oculto no Desktop) */
+.mobile-menu-btn {
+  display: none;
+  background: var(--primary);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+}
+
+.mobile-menu-btn:active {
+  transform: scale(0.95);
+}
+
+/* Botão Fechar Sidebar (Oculto no Desktop) */
+.btn-close-sidebar {
+  display: none;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 10px;
+}
+
+.btn-close-sidebar:hover {
+  color: white;
+}
+
+/* Tabelas Responsivas: Scroll Horizontal */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+}
+
+/* Container de tabelas para garantir scroll sem quebrar layout */
+.card .table-responsive {
+  margin: 0 -1rem;
+  /* Negativo para encostar nas bordas do card em mobile */
+  width: calc(100% + 2rem);
+  padding: 0 1rem;
+}
+
+/* MEDIA QUERIES PARA CELULARES E TABLETS */
+@media (max-width: 768px) {
+
+  /* Layout vira coluna */
+  .layout {
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Sidebar vira Gaveta (Drawer) */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: -290px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.5);
+    width: 280px;
+  }
+
+  .sidebar.open {
+    left: 0;
+  }
+
+  /* Controles Mobile */
+  .mobile-menu-btn {
+    display: block;
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 990;
+  }
+
+  .btn-close-sidebar {
+    display: block;
+  }
+
+  .sidebar-overlay {
+    display: block !important;
+  }
+
+  /* Conteúdo Principal */
+  .content {
+    margin-left: 0;
+    width: 100%;
+    padding: 1rem;
+    padding-top: 70px;
+  }
+
+  /* Dashboard Fix */
+  .dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .dashboard h1 {
+    margin-top: 0;
+    font-size: 1.8rem;
+  }
+
+  /* Cards e Containers */
+  .card {
+    padding: 1rem;
+    overflow: hidden;
+  }
+
+  /* Listas (Estoque, Histórico) */
+  ul {
+    gap: 1rem;
+  }
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .product-info {
+    text-align: center;
+    width: 100%;
+  }
+
+  .product-info span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 0.5rem;
+  }
+
+  .botoes-estoque {
+    justify-content: center;
+    width: 100%;
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+  }
+
+  /* Saída de Estoque - Lista */
+  .produto-item-lista {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .produto-item-lista .quantidade-control {
+    justify-content: space-between;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+  }
+
+  /* Tabelas */
+  table {
+    min-width: 600px;
+  }
+
+  th,
+  td {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.85em;
+  }
+
+  .card .table-responsive {
+    margin: 0 -1rem;
+    width: calc(100% + 2rem);
+    padding: 0 1rem;
+  }
+
+  /* Header Actions (Estoque Baixo) - Layout Coluna */
+  .header-actions {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    width: 100%;
+  }
+
+  .header-actions button {
+    width: 100%;
+    max-width: 100% !important;
+    /* Full width para toque fácil */
+    justify-content: center;
+    padding: 12px !important;
+    font-size: 1rem !important;
+  }
+
+  .header-actions h1 {
+    order: -1;
+    font-size: 1.5rem !important;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  /* Formulários e Inputs */
+  .form-group,
+  .cadastro-form {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  .search-bar input {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .cadastro-produto-container {
+    padding: 0;
+  }
+
+  .saida-estoque-container {
+    padding: 0;
+  }
 }
