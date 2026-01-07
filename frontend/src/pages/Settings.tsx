@@ -70,7 +70,7 @@ const Settings: React.FC = () => {
                 </form>
 
                 <div className="locais-list">
-                    <h3>Locais Cadastrados ({locais.length})</h3>
+                    <h3 style={{ color: 'white' }}>Locais Cadastrados ({locais.length})</h3>
                     {locais.length > 0 ? (
                         <ul>
                             {locais.map((local) => (

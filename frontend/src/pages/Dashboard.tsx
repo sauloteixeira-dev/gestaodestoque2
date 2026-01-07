@@ -15,6 +15,9 @@ const Dashboard: React.FC = () => {
     return <p>Carregando dashboard...</p>;
   }
 
+  // Ordenar produtos alfabeticamente
+  const produtosOrdenados = [...produtos].sort((a, b) => a.nome.localeCompare(b.nome));
+
   return (
     <div className="dashboard">
       <h1>Dashboard</h1>
@@ -34,8 +37,8 @@ const Dashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {produtos.length > 0 ? (
-                produtos.map(produto => (
+              {produtosOrdenados.length > 0 ? (
+                produtosOrdenados.map(produto => (
                   <tr key={produto.id}>
                     <td>{produto.nome}</td>
                     <td className={getQuantidadeColor(produto.quantidade)}>{produto.quantidade}</td>
