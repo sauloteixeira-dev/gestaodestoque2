@@ -30,8 +30,8 @@ export const LogsExclusaoProvider: React.FC<{ children: ReactNode }> = ({ childr
       const { data, error } = await supabase
         .from('logs_exclusao')
         .select('*')
-        .order('created_at', { ascending: false });
-      
+        .order('data_exclusao', { ascending: false });
+
       if (error) throw error;
       setLogs(data || []);
     } catch (error: any) {
