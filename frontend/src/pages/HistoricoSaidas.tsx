@@ -114,7 +114,7 @@ const HistoricoSaidas: React.FC = () => {
                   </thead>
                   <tbody>
                     {saidaSelecionada.itens && saidaSelecionada.itens.length > 0 ? (
-                      saidaSelecionada.itens.map((item, index) => (
+                      saidaSelecionada.itens.map((item: any, index: number) => (
                         <tr key={index}>
                           <td>{item.produto_nome}</td>
                           <td style={{ display: 'none' }}>{item.produto_codigo_barras}</td>
