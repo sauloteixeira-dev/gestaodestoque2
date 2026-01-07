@@ -102,7 +102,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       console.log('[SaidaContext] Saídas carregadas:', data?.length || 0);
 
       // Processar dados para o formato esperado
-      const processedData = (data || []).map(saida => ({
+      const processedData = (data || []).map((saida: any) => ({
         ...saida,
         itens: saida.itens?.map((item: any) => ({
           produto_nome: item.produto?.nome || 'Produto não encontrado',
