@@ -50,7 +50,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const { data, error } = await supabase
         .from('locais_saida')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('data_criacao', { ascending: false });
       
       if (error) throw error;
       setLocais(data || []);
