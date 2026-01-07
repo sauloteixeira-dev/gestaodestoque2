@@ -97,13 +97,6 @@ vercel --prod
 3. Adicione sua URL da Vercel em **"Site URL"**:
    - Exemplo: `https://sistema-gestao-estoque.vercel.app`
 
-### 2. Configure Redirect URLs
-
-Em **"Authentication"** → **"URL Configuration"** → **"Redirect URLs"**, adicione:
-```
-https://sistema-gestao-estoque.vercel.app/*
-https://sistema-gestao-estoque.vercel.app/login
-```
 
 ---
 
@@ -154,15 +147,6 @@ A Vercel automaticamente:
 
 ## 🐛 Troubleshooting
 
-### Erro: "Build Failed"
-- Verifique se as variáveis de ambiente estão corretas
-- Confira os logs de build na Vercel
-- Teste o build localmente: `npm run build`
-
-### Erro: "Cannot connect to Supabase"
-- Verifique se as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY estão configuradas
-- Confirme que a URL da Vercel está nas Redirect URLs do Supabase
-
 ### Erro 404 em rotas
 - Já configurado no `vercel.json` para redirecionar todas as rotas para `index.html`
 
@@ -175,7 +159,6 @@ A Vercel automaticamente:
 - [ ] Build concluído com sucesso
 - [ ] Site acessível na URL da Vercel
 - [ ] URL da Vercel adicionada no Supabase
-- [ ] Login funcionando
 - [ ] Todas as páginas carregando
 
 ---
