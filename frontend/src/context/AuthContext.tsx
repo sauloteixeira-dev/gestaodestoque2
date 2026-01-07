@@ -24,6 +24,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Limpar cache antigo para evitar conflitos de múltiplas instâncias
+  useEffect(() => {
+    // Limpar apenas chaves relacionadas ao Supabase para não afetar outros dados
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('supabase')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
+    // Limpar sessionStorage também
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.includes('supabase')) {
+        sessionStorage.removeItem(key);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     // Timeout de segurança: se não carregar em 10 segundos, para de carregar
     const timeout = setTimeout(() => {
