@@ -1,0 +1,58 @@
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.logs-table th,
+.logs-table td {
+  padding: 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logs-table th {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid rgba(100, 108, 255, 0.3);
+}
+
+.logs-table td {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.logs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.logs-table tr {
+  transition: all 0.3s ease;
+}
+
+.logs-table tr:hover {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  transform: scale(1.01);
+}
+
+.btn-atualizar {
+  background: linear-gradient(135deg, #646cff 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.9em;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(100, 108, 255, 0.3);
+}
+
+.btn-atualizar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+}

@@ -1,0 +1,141 @@
+.cadastro-produto-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 100%;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.cadastro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: 600px;
+  align-self: center;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cadastro-produto-container .form-group input,
+.cadastro-produto-container .form-group select,
+.cadastro-produto-container .form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  color: rgb(255, 255, 255);
+  font-size: 1em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cadastro-produto-container .form-group input:focus,
+.cadastro-produto-container .form-group select:focus,
+.cadastro-produto-container .form-group textarea:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.2);
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+}
+
+.cadastro-produto-container .form-group input::placeholder,
+.cadastro-produto-container .form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.produto-existente-aviso {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border-left: 4px solid #ffa500;
+  box-shadow: 0 4px 16px rgba(255, 165, 0, 0.2);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.produto-existente-aviso p {
+  margin: 0.8rem 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.produto-existente-aviso strong {
+  color: #ffa500;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(255, 165, 0, 0.3);
+}
+
+.btn-adicionar-mais {
+  background: linear-gradient(135deg, #646cff 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(100, 108, 255, 0.3);
+}
+
+.btn-adicionar-mais:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+}
+
+/* Botão de submit */
+.cadastro-produto-container button[type="submit"] {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.cadastro-produto-container button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.cadastro-produto-container button[type="submit"]:disabled {
+  background: linear-gradient(135deg, #444 0%, #555 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}

@@ -1,0 +1,108 @@
+.dashboard h1 {
+  margin-bottom: 2.5rem;
+  background: linear-gradient(45deg, #646cff, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.summary-card {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(100, 108, 255, 0.2);
+}
+
+.summary-card h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+}
+
+.summary-card p {
+  margin: 0;
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #646cff, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 2px 8px rgba(100, 108, 255, 0.3);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+thead {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+}
+
+th {
+  padding: 1.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom: 2px solid rgba(100, 108, 255, 0.3);
+}
+
+td {
+  padding: 1.5rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+tr {
+  transition: all 0.3s ease;
+}
+
+tr:hover {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  transform: scale(1.01);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.red {
+  color: #ff6b6b;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+  animation: pulse-red 2s infinite;
+}
+
+.green {
+  color: #63e6be;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(99, 230, 190, 0.5);
+  animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}

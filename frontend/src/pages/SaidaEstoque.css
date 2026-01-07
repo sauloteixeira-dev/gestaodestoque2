@@ -1,0 +1,304 @@
+.saida-estoque-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  max-width: none;
+}
+
+.local-selection {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  background-color: #2a2a2e;
+}
+
+.saida-estoque-container .card .local-select {
+  flex: 1;
+  min-width: 250px;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  color: rgb(255, 255, 255);
+  font-size: 1em;
+  font-weight: 500;
+}
+
+.saida-estoque-container .card .local-select:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.2);
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+}
+
+.saida-estoque-container .card .local-select option {
+  background: #2a2a2e;
+  color: rgb(255, 255, 255);
+  padding: 0.8rem;
+}
+
+.btn-add-local {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+  white-space: nowrap;
+}
+
+.btn-add-local:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.novo-local-form {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1.5rem;
+  animation: slideIn 0.3s ease;
+}
+
+.novo-local-form h3 {
+  margin-top: 0;
+  color: #28a745;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.saida-estoque-container .form-group input,
+.saida-estoque-container .form-group textarea {
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  color: rgb(255, 255, 255);
+  font-size: 1em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.saida-estoque-container .form-group input:focus,
+.saida-estoque-container .form-group textarea:focus {
+  outline: none;
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.2);
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+}
+
+.saida-estoque-container .form-group input::placeholder,
+.saida-estoque-container .form-group textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btn-confirmar {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+}
+
+.btn-confirmar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.btn-cancelar {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cancelar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+}
+
+.produtos-section {
+  margin-top: 2rem;
+}
+
+.produtos-section h3 {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.produtos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.produto-item {
+  background: linear-gradient(135deg, #2a2a2e 0%, #3a3a3e 100%);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.produto-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.produto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.produto-info strong {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.produto-info span {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.quantidade-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.quantidade-control button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #646cff 0%, #7c3aed 100%);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantidade-control button:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.quantidade-control button:disabled {
+  background: linear-gradient(135deg, #444 0%, #555 100%);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.quantidade-control input {
+  width: 60px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.btn-registrar-saida {
+  background: linear-gradient(135deg, #646cff 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(100, 108, 255, 0.3);
+  margin-top: 2rem;
+  align-self: flex-start;
+}
+
+.btn-registrar-saida:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 108, 255, 0.4);
+}
+
+.btn-registrar-saida:disabled {
+  background: linear-gradient(135deg, #444 0%, #555 100%);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .produtos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .local-selection {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .form-buttons {
+    flex-direction: column;
+  }
+  
+  .btn-confirmar,
+  .btn-cancelar {
+    width: 100%;
+  }
+}
