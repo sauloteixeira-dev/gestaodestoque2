@@ -20,15 +20,22 @@ const SaidaEstoque: React.FC = () => {
   };
 
   const handleAdicionarLocal = async () => {
-    if (!novoLocal.trim()) return;
+    console.log('Tentando adicionar local:', { novoLocal, novaDescricao });
+    
+    if (!novoLocal.trim()) {
+      console.log('Nome do local está vazio');
+      return;
+    }
     
     try {
+      console.log('Chamando adicionarLocal...');
       await adicionarLocal(capitalizarPrimeiraLetra(novoLocal), novaDescricao);
+      console.log('Local adicionado com sucesso!');
       setNovoLocal('');
       setNovaDescricao('');
       setMostrarAdicionarLocal(false);
     } catch (error) {
-      // Erro já tratado no contexto
+      console.error('Erro ao adicionar local:', error);
     }
   };
 
