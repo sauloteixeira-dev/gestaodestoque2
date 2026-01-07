@@ -297,15 +297,24 @@ const HistoricoSaidas: React.FC = () => {
                   background: white !important;
                   padding: 0 !important;
                 }
+                
+                /* Layout Ajustado para Mobile/Desktop */
                 .print-page {
                   box-shadow: none !important;
                   margin-bottom: 0 !important;
                   padding: 1cm !important;
-                  min-height: 100vh !important;
-                  height: 100vh !important;
+                  min-height: 297mm; /* Altura mínima A4 */
+                  height: auto !important; /* Altura flexível */
                   page-break-after: always !important;
                   break-after: page !important;
+                  position: relative;
                 }
+
+                .print-footer {
+                     page-break-inside: avoid;
+                     break-inside: avoid;
+                }
+
                 .print-page:last-child {
                   page-break-after: auto !important;
                   break-after: auto !important;

@@ -176,8 +176,6 @@ const EstoqueBaixo: React.FC = () => {
                     /* Ocultar tudo do corpo */
                     body * {
                         visibility: hidden;
-                        height: 0; 
-                        overflow: hidden;
                     }
 
                     /* Mostrar apenas o layout de impressão */
@@ -299,6 +297,14 @@ const EstoqueBaixo: React.FC = () => {
                         margin-top: auto;
                         padding-top: 30px;
                         text-align: center;
+                        page-break-inside: avoid;
+                        break-inside: avoid;
+                    }
+
+                    .assinatura-linha {
+                        border-top: 1px solid black;
+                        width: 60%;
+                        margin: 0 auto 10px auto;
                     }
 
                     .assinatura {

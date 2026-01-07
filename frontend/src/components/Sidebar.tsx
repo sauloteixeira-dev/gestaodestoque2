@@ -11,9 +11,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <h2>Controle de Estoque</h2>
-          <button className="btn-close-sidebar" onClick={onClose}>×</button>
         </div>
       </div>
       <nav className="sidebar-nav">
