@@ -24,10 +24,47 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificação rápida de autenticação sem timeout bloqueante
-    checkUser();
+    let isMounted = true;
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event: any, session: any) => {
+    // Verificação rápida e assíncrona
+    const initAuth = async () => {
+      try {
+        // Apenas getSession - mais rápido que getSession + getUser
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (!isMounted) return;
+
+        if (error || !session?.user) {
+          // Sem sessão válida - liberar loading imediatamente
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        // Sessão existe - carregar perfil
+        await loadUserProfile(session.user.id);
+      } catch (error) {
+        console.error('Erro ao verificar autenticação:', error);
+        setUser(null);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initAuth();
+
+    // Listener para mudanças de auth
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+      if (!isMounted) return;
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       if (session?.user) {
         await loadUserProfile(session.user.id);
       } else {
@@ -37,48 +74,10 @@ export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
     });
 
     return () => {
+      isMounted = false;
       authListener.subscription.unsubscribe();
     };
   }, []);
-
-  const checkUser = async () => {
-    try {
-      // Verificar se há uma sessão válida
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError) {
-        console.error('Erro ao obter sessão:', sessionError);
-        // Limpar dados corrompidos
-        localStorage.removeItem('supabase.auth.token');
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-
-      if (session?.user) {
-        // Verificar se a sessão ainda é válida
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-        if (userError || !user) {
-          console.error('Sessão inválida, limpando...');
-          localStorage.clear();
-          setUser(null);
-          setLoading(false);
-          return;
-        }
-
-        await loadUserProfile(session.user.id);
-      } else {
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Erro ao verificar usuário:', error);
-      localStorage.clear();
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const loadUserProfile = async (userId: string) => {
     try {
