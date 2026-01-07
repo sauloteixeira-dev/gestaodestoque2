@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface UserProfile {
@@ -19,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: any }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
