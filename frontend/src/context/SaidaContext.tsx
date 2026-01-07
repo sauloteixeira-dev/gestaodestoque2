@@ -163,8 +163,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const itensParaInserir = itens.map(item => ({
         saida_id: saidaData.id,
         produto_id: item.produto_id,
-        quantidade: item.quantidade,
-        quantidade_antes: 0 // Será atualizado depois
+        quantidade: item.quantidade
       }));
 
       const { error: itensError } = await supabase
