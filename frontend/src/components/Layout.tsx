@@ -29,13 +29,15 @@ const Layout: React.FC = () => {
         />
       )}
 
-      <button
-        className="mobile-menu-btn"
-        onClick={toggleSidebar}
-        aria-label="Menu"
-      >
-        ☰
-      </button>
+      <div className="mobile-topbar" style={{ justifyContent: 'flex-end' }}>
+        <button
+          className="mobile-menu-btn"
+          onClick={toggleSidebar}
+          aria-label="Menu"
+        >
+          ☰
+        </button>
+      </div>
 
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
