@@ -26,7 +26,7 @@ const CadastroProduto: React.FC = () => {
 
     const encontrado = produtos.find(p => p.codigo_barras === value);
     console.log('Produto encontrado:', encontrado);
-    
+
     if (encontrado) {
       setProdutoExistente(encontrado);
       setNome(capitalizarPrimeiraLetra(encontrado.nome));
@@ -100,7 +100,7 @@ const CadastroProduto: React.FC = () => {
                     id="quantidadeAdicional"
                     type="number"
                     value={quantidadeAdicional}
-                    onChange={(e) => setQuantidadeAdicional(parseInt(e.target.value))}
+                    onChange={(e) => setQuantidadeAdicional(parseInt(e.target.value) || 1)}
                     min="1"
                     required
                   />
@@ -127,7 +127,7 @@ const CadastroProduto: React.FC = () => {
                   type="number"
                   placeholder="1"
                   value={quantidade}
-                  onChange={(e) => setQuantidade(parseInt(e.target.value))}
+                  onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
                   min="1"
                   required
                 />

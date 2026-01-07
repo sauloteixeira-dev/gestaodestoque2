@@ -31,7 +31,7 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
         .from('produtos')
         .select('*')
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
       setProdutos(data || []);
     } catch (error) {
@@ -51,9 +51,9 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
       const { error } = await supabase
         .from('produtos')
         .insert({ codigo_barras: codigoBarras, nome, quantidade });
-      
+
       if (error) throw error;
-      
+
       await fetchProdutos();
       toast.success('Produto adicionado com sucesso!');
     } catch (error: any) {
@@ -70,16 +70,16 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
         .from('produtos')
         .update({ quantidade: quantidadeBaixa })
         .eq('id', produtoId);
-      
+
       if (error) throw error;
-      
+
       // Atualizar localmente para melhor UX
-      setProdutos(prev => prev.map(p => 
-        p.id === produtoId 
+      setProdutos(prev => prev.map(p =>
+        p.id === produtoId
           ? { ...p, quantidade: Math.max(0, p.quantidade - quantidadeBaixa) }
           : p
       ));
-      
+
       await fetchProdutos();
       toast.success('Estoque atualizado com sucesso!');
     } catch (error: any) {
@@ -92,20 +92,23 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const darEntradaEstoque = async (produto: Produto, quantidadeEntrada: number) => {
     try {
+      // Calcular nova quantidade (soma ao estoque atual)
+      const novaQuantidade = produto.quantidade + quantidadeEntrada;
+
       const { error } = await supabase
         .from('produtos')
-        .update({ quantidade: quantidadeEntrada })
+        .update({ quantidade: novaQuantidade })
         .eq('id', produto.id);
-      
+
       if (error) throw error;
-      
+
       // Atualizar localmente para melhor UX
-      setProdutos(prev => prev.map(p => 
-        p.id === produto.id 
-          ? { ...p, quantidade: p.quantidade + quantidadeEntrada }
+      setProdutos(prev => prev.map(p =>
+        p.id === produto.id
+          ? { ...p, quantidade: novaQuantidade }
           : p
       ));
-      
+
       await fetchProdutos();
       toast.success('Entrada no estoque realizada com sucesso!');
     } catch (error: any) {
@@ -124,7 +127,7 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
         .select('*')
         .eq('id', produtoId)
         .single();
-      
+
       if (produto) {
         await supabase
           .from('logs_exclusao')
@@ -136,15 +139,15 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
             motivo: 'Produto excluído do sistema'
           });
       }
-      
+
       // Agora excluir o produto
       const { error } = await supabase
         .from('produtos')
         .delete()
         .eq('id', produtoId);
-      
+
       if (error) throw error;
-      
+
       await fetchProdutos();
       toast.success('Produto excluído com sucesso!');
     } catch (error: any) {
