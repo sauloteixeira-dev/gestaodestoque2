@@ -58,7 +58,7 @@ const EstoqueBaixo: React.FC = () => {
                         <table className="table-estoque">
                             <thead>
                                 <tr>
-                                    <th>Código</th>
+                                    <th className="hide-mobile">Código</th>
                                     <th>Produto</th>
                                     <th style={{ textAlign: 'center' }}>Quantidade</th>
                                 </tr>
@@ -66,7 +66,7 @@ const EstoqueBaixo: React.FC = () => {
                             <tbody>
                                 {produtosBaixoEstoque.map(produto => (
                                     <tr key={produto.id}>
-                                        <td>{produto.codigo_barras}</td>
+                                        <td className="hide-mobile">{produto.codigo_barras}</td>
                                         <td>{produto.nome}</td>
                                         <td style={{ textAlign: 'center', color: '#ff4444', fontWeight: 'bold' }}>
                                             {produto.quantidade}

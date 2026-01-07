@@ -2179,16 +2179,19 @@ li:hover {
     min-width: 600px;
   }
 
-  /* Exceção para Dashboard (tabela simples) */
-  .dashboard table {
+  /* Exceção para Dashboard e Estoque Baixo (tabelas simples) */
+  .dashboard table,
+  .estoque-baixo-container table {
     min-width: auto;
     width: 100%;
     table-layout: fixed;
   }
 
-  /* Reduçao de padding no Dashboard para evitar scroll */
+  /* Reduçao de padding no Dashboard e Estoque Baixo para evitar scroll */
   .dashboard th,
-  .dashboard td {
+  .dashboard td,
+  .estoque-baixo-container th,
+  .estoque-baixo-container td {
     padding: 0.5rem 0.2rem;
     white-space: normal;
     word-wrap: break-word;
