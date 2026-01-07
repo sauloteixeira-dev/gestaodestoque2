@@ -1,8 +1,11 @@
 import React, { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
-import axios, { AxiosError } from 'axios';
+import { createClient } from '@supabase/supabase-js';
 import { toast } from 'react-toastify';
 
-const API_URL = 'http://localhost:3001';
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 interface Produto {
   id: number;
@@ -29,9 +32,15 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
   const fetchProdutos = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<Produto[]>(`${API_URL}/produtos`);
-      setProdutos(response.data);
+      const { data, error } = await supabase
+        .from('produtos')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setProdutos(data || []);
     } catch (error) {
+      console.error('Erro ao buscar produtos:', error);
       toast.error('Erro ao buscar produtos.');
     } finally {
       setLoading(false);
@@ -44,12 +53,17 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const adicionarProduto = async (codigoBarras: string, nome: string, quantidade: number) => {
     try {
-      await axios.post(`${API_URL}/produtos`, { codigo_barras: codigoBarras, nome, quantidade });
-      await fetchProdutos(); // Re-fetch para garantir consistência total
+      const { error } = await supabase
+        .from('produtos')
+        .insert({ codigo_barras: codigoBarras, nome, quantidade });
+      
+      if (error) throw error;
+      
+      await fetchProdutos();
       toast.success('Produto adicionado com sucesso!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ error: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Erro desconhecido ao adicionar produto.';
+    } catch (error: any) {
+      console.error('Erro ao adicionar produto:', error);
+      const errorMessage = error.message || 'Erro desconhecido ao adicionar produto.';
       toast.error(errorMessage);
       throw error;
     }
@@ -57,12 +71,25 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const darBaixaEstoque = async (produtoId: number, quantidadeBaixa: number) => {
     try {
-      await axios.post(`${API_URL}/produtos/saida`, { produto_id: produtoId, quantidade: quantidadeBaixa });
-      await fetchProdutos(); // Força a atualização buscando os dados mais recentes
+      const { error } = await supabase
+        .from('produtos')
+        .update({ quantidade: quantidadeBaixa })
+        .eq('id', produtoId);
+      
+      if (error) throw error;
+      
+      // Atualizar localmente para melhor UX
+      setProdutos(prev => prev.map(p => 
+        p.id === produtoId 
+          ? { ...p, quantidade: Math.max(0, p.quantidade - quantidadeBaixa) }
+          : p
+      ));
+      
+      await fetchProdutos();
       toast.success('Estoque atualizado com sucesso!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ error: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Erro desconhecido ao dar baixa no estoque.';
+    } catch (error: any) {
+      console.error('Erro ao dar baixa no estoque:', error);
+      const errorMessage = error.message || 'Erro desconhecido ao dar baixa no estoque.';
       toast.error(errorMessage);
       throw error;
     }
@@ -70,16 +97,25 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const darEntradaEstoque = async (produto: Produto, quantidadeEntrada: number) => {
     try {
-      await axios.post(`${API_URL}/produtos`, { 
-        codigo_barras: produto.codigo_barras, 
-        nome: produto.nome, 
-        quantidade: quantidadeEntrada 
-      });
-      await fetchProdutos(); // Força a atualização buscando os dados mais recentes
-      toast.success('Estoque atualizado com sucesso!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ error: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Erro desconhecido ao dar entrada no estoque.';
+      const { error } = await supabase
+        .from('produtos')
+        .update({ quantidade: quantidadeEntrada })
+        .eq('id', produto.id);
+      
+      if (error) throw error;
+      
+      // Atualizar localmente para melhor UX
+      setProdutos(prev => prev.map(p => 
+        p.id === produto.id 
+          ? { ...p, quantidade: p.quantidade + quantidadeEntrada }
+          : p
+      ));
+      
+      await fetchProdutos();
+      toast.success('Entrada no estoque realizada com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao dar entrada no estoque:', error);
+      const errorMessage = error.message || 'Erro desconhecido ao dar entrada no estoque.';
       toast.error(errorMessage);
       throw error;
     }
@@ -87,12 +123,38 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const excluirProduto = async (produtoId: number) => {
     try {
-      await axios.delete(`${API_URL}/produtos/${produtoId}`);
+      // Primeiro, registrar na tabela de logs de exclusão
+      const { data: produto } = await supabase
+        .from('produtos')
+        .select('*')
+        .eq('id', produtoId)
+        .single();
+      
+      if (produto) {
+        await supabase
+          .from('logs_exclusao')
+          .insert({
+            produto_id: produto.id,
+            produto_codigo_barras: produto.codigo_barras,
+            produto_nome: produto.nome,
+            produto_quantidade: produto.quantidade,
+            motivo: 'Produto excluído do sistema'
+          });
+      }
+      
+      // Agora excluir o produto
+      const { error } = await supabase
+        .from('produtos')
+        .delete()
+        .eq('id', produtoId);
+      
+      if (error) throw error;
+      
       await fetchProdutos();
       toast.success('Produto excluído com sucesso!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ error: string }>;
-      const errorMessage = axiosError.response?.data?.error || 'Erro desconhecido ao excluir produto.';
+    } catch (error: any) {
+      console.error('Erro ao excluir produto:', error);
+      const errorMessage = error.message || 'Erro desconhecido ao excluir produto.';
       toast.error(errorMessage);
       throw error;
     }
