@@ -67,7 +67,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         .select(`
           *,
           local:locais_saida(nome),
-          itens:saidas_estoque_itens(
+          itens:itens_saida(
             *,
             produto:produtos(nome, codigo_barras)
           )
@@ -141,7 +141,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }));
       
       const { error: itensError } = await supabase
-        .from('saidas_estoque_itens')
+        .from('itens_saida')
         .insert(itensParaInserir);
       
       if (itensError) throw itensError;
