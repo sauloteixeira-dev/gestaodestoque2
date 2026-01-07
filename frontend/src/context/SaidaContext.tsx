@@ -159,12 +159,29 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       if (saidaError) throw saidaError;
 
-      // Depois, adicionar os itens
-      const itensParaInserir = itens.map(item => ({
-        saida_id: saidaData.id,
-        produto_id: item.produto_id,
-        quantidade: item.quantidade
-      }));
+      // Buscar dados dos produtos para preencher campos obrigatórios
+      const produtoIds = itens.map(item => item.produto_id);
+      const { data: produtos, error: produtosError } = await supabase
+        .from('produtos')
+        .select('id, nome, codigo_barras, quantidade')
+        .in('id', produtoIds);
+
+      if (produtosError) throw produtosError;
+
+      // Criar mapa de produtos por ID
+      const produtosMap = new Map(produtos?.map((p: any) => [p.id, p]) || []);
+
+      // Montar itens para inserir com dados do produto
+      const itensParaInserir = itens.map(item => {
+        const produto: any = produtosMap.get(item.produto_id);
+        return {
+          saida_id: saidaData.id,
+          produto_id: item.produto_id,
+          produto_nome: produto?.nome || 'Produto não encontrado',
+          produto_codigo_barras: produto?.codigo_barras || 'N/A',
+          quantidade: item.quantidade
+        };
+      });
 
       const { error: itensError } = await supabase
         .from('itens_saida')
