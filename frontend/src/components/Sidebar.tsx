@@ -32,6 +32,10 @@ const Sidebar: React.FC = () => {
         <NavLink to="/logs-exclusao" className={({ isActive }) => (isActive ? 'active' : '')}>
           🗑️ Logs de Exclusão
         </NavLink>
+
+        <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
+          ⚙️ Configurações
+        </NavLink>
       </nav>
     </aside>
   );

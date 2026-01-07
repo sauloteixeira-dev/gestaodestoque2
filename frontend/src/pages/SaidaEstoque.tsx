@@ -5,39 +5,18 @@ import './SaidaEstoque.css';
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();
-  const { locais, adicionarLocal, registrarSaida } = useSaida();
+  const { locais, registrarSaida } = useSaida();
   const [localSelecionado, setLocalSelecionado] = useState<number | null>(null);
-  const [novoLocal, setNovoLocal] = useState('');
-  const [novaDescricao, setNovaDescricao] = useState('');
   const [usuario, setUsuario] = useState('');
   const [observacoes, setObservacoes] = useState('');
-  const [itensSelecionados, setItensSelecionados] = useState<{[key: number]: number}>({});
-  const [mostrarAdicionarLocal, setMostrarAdicionarLocal] = useState(false);
+  const [itensSelecionados, setItensSelecionados] = useState<{ [key: number]: number }>({});
 
   const capitalizarPrimeiraLetra = (texto: string): string => {
     if (!texto) return texto;
     return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
   };
 
-  const handleAdicionarLocal = async () => {
-    console.log('Tentando adicionar local:', { novoLocal, novaDescricao });
-    
-    if (!novoLocal.trim()) {
-      console.log('Nome do local está vazio');
-      return;
-    }
-    
-    try {
-      console.log('Chamando adicionarLocal...');
-      await adicionarLocal(capitalizarPrimeiraLetra(novoLocal), novaDescricao);
-      console.log('Local adicionado com sucesso!');
-      setNovoLocal('');
-      setNovaDescricao('');
-      setMostrarAdicionarLocal(false);
-    } catch (error) {
-      console.error('Erro ao adicionar local:', error);
-    }
-  };
+
 
   const handleQuantidadeChange = (produtoId: number, quantidade: number) => {
     setItensSelecionados(prev => ({
@@ -79,13 +58,13 @@ const SaidaEstoque: React.FC = () => {
     <div className="saida-estoque-container">
       <div className="card">
         <h2>Registrar Saída de Estoque</h2>
-        
+
         {/* Seleção de Local */}
         <div className="form-group">
           <label>Local de Destino</label>
           <div className="local-selection">
-            <select 
-              value={localSelecionado || ''} 
+            <select
+              value={localSelecionado || ''}
               onChange={(e) => setLocalSelecionado(parseInt(e.target.value))}
               className="local-select"
             >
@@ -96,48 +75,8 @@ const SaidaEstoque: React.FC = () => {
                 </option>
               ))}
             </select>
-            <button 
-              type="button" 
-              onClick={() => setMostrarAdicionarLocal(true)}
-              className="btn-add-local"
-            >
-              + Adicionar Local
-            </button>
           </div>
         </div>
-
-        {/* Formulário para adicionar novo local */}
-        {mostrarAdicionarLocal && (
-          <div className="novo-local-form">
-            <h3>Adicionar Novo Local</h3>
-            <div className="form-group">
-              <label>Nome do Local</label>
-              <input
-                type="text"
-                value={novoLocal}
-                onChange={(e) => setNovoLocal(e.target.value)}
-                placeholder="Ex: Cozinha Comunitária"
-              />
-            </div>
-            <div className="form-group">
-              <label>Descrição (opcional)</label>
-              <input
-                type="text"
-                value={novaDescricao}
-                onChange={(e) => setNovaDescricao(e.target.value)}
-                placeholder="Descrição do local"
-              />
-            </div>
-            <div className="form-buttons">
-              <button onClick={handleAdicionarLocal} className="btn-confirmar">
-                Adicionar
-              </button>
-              <button onClick={() => setMostrarAdicionarLocal(false)} className="btn-cancelar">
-                Cancelar
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Informações da Retirada */}
         <div className="form-group">
@@ -172,7 +111,7 @@ const SaidaEstoque: React.FC = () => {
                   <span>Estoque: {produto.quantidade}</span>
                 </div>
                 <div className="quantidade-control">
-                  <button 
+                  <button
                     onClick={() => handleQuantidadeChange(produto.id, Math.max(0, (itensSelecionados[produto.id] || 0) - 1))}
                     disabled={(itensSelecionados[produto.id] || 0) === 0}
                   >
@@ -185,7 +124,7 @@ const SaidaEstoque: React.FC = () => {
                     min="0"
                     max={produto.quantidade}
                   />
-                  <button 
+                  <button
                     onClick={() => handleQuantidadeChange(produto.id, Math.min(produto.quantidade, (itensSelecionados[produto.id] || 0) + 1))}
                     disabled={(itensSelecionados[produto.id] || 0) >= produto.quantidade}
                   >
@@ -197,7 +136,7 @@ const SaidaEstoque: React.FC = () => {
           </div>
         </div>
 
-        <button 
+        <button
           onClick={handleRegistrarSaida}
           className="btn-registrar-saida"
           disabled={!localSelecionado || !usuario.trim()}

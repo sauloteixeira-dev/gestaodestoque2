@@ -6,6 +6,7 @@ import Estoque from './pages/Estoque';
 import SaidaEstoque from './pages/SaidaEstoque';
 import HistoricoSaidas from './pages/HistoricoSaidas';
 import LogsExclusao from './pages/LogsExclusao';
+import Settings from './pages/Settings';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -32,6 +33,7 @@ function App() {
           <Route path="historico-saidas" element={<HistoricoSaidas />} />
           <Route path="estoque" element={<Estoque />} />
           <Route path="logs-exclusao" element={<LogsExclusao />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </>
