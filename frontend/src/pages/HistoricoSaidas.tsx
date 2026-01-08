@@ -12,8 +12,7 @@ const HistoricoSaidas: React.FC = () => {
   };
 
   const gerarDocumento = (saida: SaidaEstoque) => {
-    console.log('Dados da saída selecionada:', saida);
-    console.log('Itens da saída:', saida.itens);
+
     setSaidaSelecionada(saida);
   };
 

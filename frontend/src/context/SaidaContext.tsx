@@ -25,7 +25,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const fetchLocais = async () => {
     try {
-      console.log('[SaidaContext] Buscando locais de saída...');
+
       const { data, error } = await supabase
         .from('locais_saida')
         .select('*')
@@ -39,7 +39,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         throw error;
       }
 
-      console.log('[SaidaContext] Locais carregados:', data?.length || 0);
+
       setLocais(data || []);
     } catch (error: any) {
       console.error('[SaidaContext] Erro ao buscar locais:', error);
@@ -57,7 +57,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const fetchSaidas = async () => {
     try {
-      console.log('[SaidaContext] Buscando histórico de saídas...');
+
       const { data, error } = await supabase
         .from('saidas_estoque')
         .select(`
@@ -77,7 +77,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         throw error;
       }
 
-      console.log('[SaidaContext] Saídas carregadas:', data?.length || 0);
+
 
       // Processar dados para o formato esperado
       const processedData = (data || []).map((saida: any) => ({

@@ -21,11 +21,7 @@ const CadastroProduto: React.FC = () => {
     const value = e.target.value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
     setCodigoBarras(value);
 
-    console.log('Verificando código:', value);
-    console.log('Produtos disponíveis:', produtos);
-
     const encontrado = produtos.find(p => p.codigo_barras === value);
-    console.log('Produto encontrado:', encontrado);
 
     if (encontrado) {
       setProdutoExistente(encontrado);
