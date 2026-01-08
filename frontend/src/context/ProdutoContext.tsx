@@ -125,40 +125,40 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
         .single();
 
       if (produto) {
-        await supabase
           .from('logs_exclusao')
-          .insert({
-            produto_id: produto.id,
-            produto_codigo_barras: produto.codigo_barras,
-            produto_nome: produto.nome,
-            produto_quantidade: produto.quantidade,
-            motivo: 'Produto excluído do sistema'
-          });
+  .insert({
+    // Não vincular ID para evitar cascade delete
+    // produto_id: produto.id,
+    produto_codigo_barras: produto.codigo_barras,
+    produto_nome: produto.nome,
+    produto_quantidade: produto.quantidade,
+    motivo: 'Produto excluído do sistema'
+  });
       }
 
-      // Agora excluir o produto
-      const { error } = await supabase
-        .from('produtos')
-        .delete()
-        .eq('id', produtoId);
+// Agora excluir o produto
+const { error } = await supabase
+  .from('produtos')
+  .delete()
+  .eq('id', produtoId);
 
-      if (error) throw error;
+if (error) throw error;
 
-      await fetchProdutos();
-      toast.success('Produto excluído com sucesso!');
+await fetchProdutos();
+toast.success('Produto excluído com sucesso!');
     } catch (error: any) {
-      console.error('Erro ao excluir produto:', error);
-      const errorMessage = error.message || 'Erro desconhecido ao excluir produto.';
-      toast.error(errorMessage);
-      throw error;
-    }
+  console.error('Erro ao excluir produto:', error);
+  const errorMessage = error.message || 'Erro desconhecido ao excluir produto.';
+  toast.error(errorMessage);
+  throw error;
+}
   };
 
-  return (
-    <ProdutoContext.Provider value={{ produtos, loading, adicionarProduto, darBaixaEstoque, darEntradaEstoque, excluirProduto, buscarProdutos: fetchProdutos }}>
-      {children}
-    </ProdutoContext.Provider>
-  );
+return (
+  <ProdutoContext.Provider value={{ produtos, loading, adicionarProduto, darBaixaEstoque, darEntradaEstoque, excluirProduto, buscarProdutos: fetchProdutos }}>
+    {children}
+  </ProdutoContext.Provider>
+);
 };
 
 export const useProdutos = () => {

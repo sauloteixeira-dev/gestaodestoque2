@@ -32,7 +32,7 @@ export interface SaidaEstoque {
 
 export interface LogExclusao {
     id: number;
-    produto_id: number;
+    produto_id?: number;
     produto_nome: string;
     produto_codigo_barras: string;
     produto_quantidade: number;
