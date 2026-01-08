@@ -83,10 +83,10 @@ const Settings: React.FC = () => {
                     <h3 style={{ color: 'white' }}>Locais Cadastrados ({locais.length})</h3>
                     {locais.length > 0 ? (
                         <ul>
-                            {locais.map((local, index) => (
+                            {locais.map((local) => (
                                 <li key={local.id} className="local-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
-                                        <strong>{index + 1}. {local.nome}</strong>
+                                        <strong>{local.id} - {local.nome}</strong>
                                         {local.descricao && <span> - {local.descricao}</span>}
                                     </div>
                                     <button
