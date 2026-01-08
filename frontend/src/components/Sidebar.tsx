@@ -32,16 +32,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           📋 Histórico de Saídas
         </NavLink>
 
-        <NavLink to="/estoque" className={({ isActive }) => (isActive ? 'active' : '')} onClick={onClose}>
-          📦 Gerenciar Estoque
-        </NavLink>
-
         <NavLink to="/estoque-baixo" className={({ isActive }) => (isActive ? 'active' : '')} onClick={onClose}>
           📉 Estoque Baixo
-        </NavLink>
-
-        <NavLink to="/logs-exclusao" className={({ isActive }) => (isActive ? 'active' : '')} onClick={onClose}>
-          🗑️ Logs de Exclusão
         </NavLink>
 
         <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')} onClick={onClose}>

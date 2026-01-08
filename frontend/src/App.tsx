@@ -32,9 +32,7 @@ function App() {
           <Route path="cadastrar" element={<CadastroProduto />} />
           <Route path="saida" element={<SaidaEstoque />} />
           <Route path="historico-saidas" element={<HistoricoSaidas />} />
-          <Route path="estoque" element={<Estoque />} />
           <Route path="estoque-baixo" element={<EstoqueBaixo />} />
-          <Route path="logs-exclusao" element={<LogsExclusao />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
