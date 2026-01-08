@@ -10,6 +10,7 @@ interface SaidaContextData {
   saidas: SaidaEstoque[];
   loading: boolean;
   adicionarLocal: (nome: string, descricao?: string) => Promise<void>;
+  removerLocal: (id: number) => Promise<void>;
   registrarSaida: (local_id: number, usuario_retirada: string, itens: ItemSaida[], observacoes?: string) => Promise<void>;
   buscarSaidas: () => Promise<void>;
 }
@@ -125,6 +126,25 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
+  const removerLocal = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('locais_saida')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      await fetchLocais();
+      toast.success('Local removido com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao remover local:', error);
+      const errorMessage = error.message || 'Erro ao remover local. Verifique se existem saídas vinculadas.';
+      toast.error(errorMessage);
+      throw error;
+    }
+  };
+
   const registrarSaida = async (local_id: number, usuario_retirada: string, itens: ItemSaida[], observacoes?: string) => {
     try {
       // Primeiro, criar a saída principal
@@ -191,7 +211,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   return (
-    <SaidaContext.Provider value={{ locais, saidas, loading, adicionarLocal, registrarSaida, buscarSaidas: fetchSaidas }}>
+    <SaidaContext.Provider value={{ locais, saidas, loading, adicionarLocal, removerLocal, registrarSaida, buscarSaidas: fetchSaidas }}>
       {children}
     </SaidaContext.Provider>
   );

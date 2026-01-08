@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 
 
 const Settings: React.FC = () => {
-    const { locais, adicionarLocal } = useSaida();
+    const { locais, adicionarLocal, removerLocal } = useSaida();
     const [novoLocal, setNovoLocal] = useState('');
     const [novaDescricao, setNovaDescricao] = useState('');
     const [loading, setLoading] = useState(false);
@@ -30,6 +30,16 @@ const Settings: React.FC = () => {
             console.error(error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRemoverLocal = async (id: number, nome: string) => {
+        if (window.confirm(`Tem certeza que deseja remover o local "${nome}"?`)) {
+            try {
+                await removerLocal(id);
+            } catch (error) {
+                console.error('Erro ao remover local:', error);
+            }
         }
     };
 
@@ -74,9 +84,31 @@ const Settings: React.FC = () => {
                     {locais.length > 0 ? (
                         <ul>
                             {locais.map((local) => (
-                                <li key={local.id} className="local-item">
-                                    <strong>{local.nome}</strong>
-                                    {local.descricao && <span> - {local.descricao}</span>}
+                                <li key={local.id} className="local-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <strong>{local.nome}</strong>
+                                        {local.descricao && <span> - {local.descricao}</span>}
+                                    </div>
+                                    <button
+                                        onClick={() => handleRemoverLocal(local.id, local.nome)}
+                                        style={{
+                                            background: '#ff4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '50%',
+                                            width: '24px',
+                                            height: '24px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            cursor: 'pointer',
+                                            fontSize: '12px',
+                                            marginLeft: '10px'
+                                        }}
+                                        title="Remover local"
+                                    >
+                                        ✕
+                                    </button>
                                 </li>
                             ))}
                         </ul>
