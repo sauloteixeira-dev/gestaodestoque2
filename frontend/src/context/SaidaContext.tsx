@@ -139,8 +139,13 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       toast.success('Local removido com sucesso!');
     } catch (error: any) {
       console.error('Erro ao remover local:', error);
-      const errorMessage = error.message || 'Erro ao remover local. Verifique se existem saídas vinculadas.';
-      toast.error(errorMessage);
+
+      if (error.code === '23503') {
+        toast.warning('Não é possível remover este local pois existem saídas registradas para ele.');
+      } else {
+        const errorMessage = error.message || 'Erro ao remover local.';
+        toast.error(errorMessage);
+      }
       throw error;
     }
   };
