@@ -176,7 +176,7 @@ const HistoricoSaidas: React.FC = () => {
                                   </td>
                                   <td style={{ padding: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>{item.produto_codigo_barras}</td>
                                   <td style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 700, color: 'var(--text-primary)' }}>{item.quantidade}</td>
-                                  <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-muted)' }}>{item.produto_quantidade_antes - item.quantidade}</td>
+                                  <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-muted)' }}>{(item.produto_quantidade_antes || 0) - item.quantidade}</td>
                                 </tr>
                               ))}
                             </tbody>

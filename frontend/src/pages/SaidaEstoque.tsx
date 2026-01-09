@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
-import { Search, Plus, Minus, Send, Check } from 'lucide-react';
+import { Search, Plus, Minus, Send } from 'lucide-react';
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();
