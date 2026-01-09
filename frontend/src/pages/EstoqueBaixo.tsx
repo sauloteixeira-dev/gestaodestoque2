@@ -2,6 +2,7 @@ import React from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import brasao from '../../public/images/brasao.png';
 import crasLogo from '../../public/images/cras-logo.png';
+import { AlertTriangle, Printer } from 'lucide-react';
 
 const EstoqueBaixo: React.FC = () => {
     const { produtos, loading } = useProdutos();
@@ -16,60 +17,59 @@ const EstoqueBaixo: React.FC = () => {
     };
 
     if (loading) {
-        return <div className="loading">Carregando...</div>;
+        return <div style={{ padding: '2rem', color: 'var(--text-secondary)' }}>Carregando...</div>;
     }
 
     return (
-        <div className="estoque-baixo-container">
-            <div className="header-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1 style={{ margin: 0 }}>Relatório de Estoque Baixo</h1>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Estoque Crítico</h1>
+                    <p style={{ color: 'var(--text-secondary)' }}>Relatório de itens que precisam de reposição.</p>
+                </div>
                 <button
                     onClick={() => window.print()}
-                    className="btn-imprimir"
-                    style={{
-                        background: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        padding: '8px 10px',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '5px',
-                        maxWidth: '100px',
-                        fontSize: '12px',
-                        whiteSpace: 'normal',
-                        textAlign: 'center',
-                        lineHeight: '1.2'
-                    }}
+                    className="btn-primary"
+                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
                 >
-                    🖨️ Imprimir
+                    <Printer size={18} />
+                    Imprimir Relatório
                 </button>
             </div>
 
             {/* Visualização em Tela (Tabela Simples) */}
-            <div className="card">
+            <div className="card-base">
                 {produtosBaixoEstoque.length === 0 ? (
-                    <p style={{ textAlign: 'center', padding: '20px', color: '#aaa' }}>Nenhum produto com estoque baixo (quantidade &le; {limiteEstoque}).</p>
+                    <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
+                        <div style={{ marginBottom: '1rem', color: '#4ade80' }}>
+                            <AlertTriangle size={48} />
+                        </div>
+                        <h3>Tudo certo!</h3>
+                        <p>Nenhum produto está com estoque baixo no momento.</p>
+                    </div>
                 ) : (
                     <div className="table-responsive">
-                        <table className="table-estoque">
+                        <table style={{ width: '100%' }}>
                             <thead>
                                 <tr>
                                     <th className="hide-mobile">Código</th>
                                     <th>Produto</th>
                                     <th style={{ textAlign: 'center' }}>Quantidade</th>
+                                    <th style={{ textAlign: 'right' }}>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {produtosBaixoEstoque.map(produto => (
                                     <tr key={produto.id}>
-                                        <td className="hide-mobile">{produto.codigo_barras}</td>
-                                        <td>{produto.nome}</td>
-                                        <td style={{ textAlign: 'center', color: '#ff4444', fontWeight: 'bold' }}>
+                                        <td className="hide-mobile" style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{produto.codigo_barras}</td>
+                                        <td style={{ fontWeight: 500 }}>{produto.nome}</td>
+                                        <td style={{ textAlign: 'center', color: '#f87171', fontWeight: 'bold' }}>
                                             {produto.quantidade}
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <span style={{ fontSize: '0.75rem', padding: '4px 12px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                                Repor Urgente
+                                            </span>
                                         </td>
                                     </tr>
                                 ))}
@@ -79,7 +79,7 @@ const EstoqueBaixo: React.FC = () => {
                 )}
             </div>
 
-            {/* Conteúdo Exclusivo para Impressão */}
+            {/* Conteúdo Exclusivo para Impressão - MANTIDO LOGICA ORIGINAL COM APENAS AJUSTES MINIMOS DE CSS INLINE SE NECESSARIO, MAS A LOGICA DE CHUNKS É CRÍTICA */}
             <div className="print-layout">
                 {(() => {
                     const ITENS_POR_PAGINA = 10;
@@ -162,7 +162,7 @@ const EstoqueBaixo: React.FC = () => {
                     display: none;
                 }
 
-                /* Estilos de impressão */
+                /* Estilos de impressão - MANTIDOS DA VERSÃO ORIGINAL */
                 @media print {
                     @page {
                         margin: 0;

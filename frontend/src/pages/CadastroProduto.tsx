@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
-
+import { PackagePlus, Barcode, Box, PlusCircle, AlertCircle, Save } from 'lucide-react';
 
 const CadastroProduto: React.FC = () => {
   const { produtos, adicionarProduto, darEntradaEstoque } = useProdutos();
@@ -18,7 +18,7 @@ const CadastroProduto: React.FC = () => {
   };
 
   const handleCodigoBarrasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+    const value = e.target.value.replace(/\D/g, '');
     setCodigoBarras(value);
 
     const encontrado = produtos.find(p => p.codigo_barras === value);
@@ -39,6 +39,7 @@ const CadastroProduto: React.FC = () => {
       if (produtoExistente) {
         await darEntradaEstoque(produtoExistente, quantidadeAdicional);
         setQuantidadeAdicional(1);
+        setIsAddingToExisting(false);
       } else {
         await adicionarProduto(codigoBarras, capitalizarPrimeiraLetra(nome), quantidade);
         setCodigoBarras('');
@@ -47,92 +48,143 @@ const CadastroProduto: React.FC = () => {
       }
       setProdutoExistente(null);
     } catch (error) {
-      // O erro já é tratado no contexto
+      // Erro já tratado no contexto
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleAdicionarMais = () => {
-    setIsAddingToExisting(true);
-  };
-
   return (
-    <div className="cadastro-produto-container">
-      <div className="card">
-        <h2>Cadastrar Novo Produto</h2>
-        <form onSubmit={handleSubmit} className="cadastro-form">
-          <div className="form-group">
-            <label htmlFor="codigoBarras">Código de Barras</label>
-            <input
-              id="codigoBarras"
-              type="number"
-              placeholder="Digite apenas números"
-              value={codigoBarras}
-              onChange={handleCodigoBarrasChange}
-              onKeyPress={(e) => {
-                // Impede entrada de caracteres não numéricos
-                const char = String.fromCharCode(e.which);
-                if (!/[0-9]/.test(char)) {
-                  e.preventDefault();
-                }
-              }}
-              required
-            />
-          </div>
-          {produtoExistente ? (
-            <div className="produto-existente-aviso">
-              <p><strong>Produto já cadastrado!</strong></p>
-              <p>Nome: {produtoExistente.nome}</p>
-              <p>Quantidade atual: {produtoExistente.quantidade}</p>
-              {!isAddingToExisting ? (
-                <button type="button" onClick={handleAdicionarMais} className="btn-adicionar-mais">
-                  Adicionar mais itens
-                </button>
-              ) : (
-                <div className="form-group">
-                  <label htmlFor="quantidadeAdicional">Quantidade a Adicionar</label>
+    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Novo Produto</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>Cadastre novos itens ou adicione estoque.</p>
+      </div>
+
+      <div className="card-base">
+        <form onSubmit={handleSubmit}>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+
+            {/* Coluna 1: Identificação */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* Código de Barras */}
+              <div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>
+                  <Barcode size={16} color="var(--accent-primary)" />
+                  Código de Barras
+                </label>
+                <input
+                  type="text"
+                  value={codigoBarras}
+                  onChange={handleCodigoBarrasChange}
+                  placeholder="Escaneie ou digite..."
+                  className="input-field"
+                  required
+                  autoFocus
+                />
+              </div>
+
+              {/* Nome do Produto (Renderizado aqui se não existir) */}
+              {!produtoExistente && (
+                <div>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>
+                    <PackagePlus size={16} color="var(--accent-primary)" />
+                    Nome do Produto
+                  </label>
                   <input
-                    id="quantidadeAdicional"
-                    type="number"
-                    value={quantidadeAdicional}
-                    onChange={(e) => setQuantidadeAdicional(parseInt(e.target.value) || 1)}
-                    min="1"
+                    type="text"
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    placeholder="Ex: Teclado Mecânico"
+                    className="input-field"
                     required
                   />
                 </div>
               )}
             </div>
-          ) : (
-            <>
-              <div className="form-group">
-                <label htmlFor="nome">Nome do Produto</label>
-                <input
-                  id="nome"
-                  type="text"
-                  placeholder="Digite o nome do produto"
-                  value={capitalizarPrimeiraLetra(nome)}
-                  onChange={(e) => setNome(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="quantidade">Quantidade Inicial</label>
-                <input
-                  id="quantidade"
-                  type="number"
-                  placeholder="1"
-                  value={quantidade}
-                  onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
-                  min="1"
-                  required
-                />
-              </div>
-            </>
-          )}
-          <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Processando...' : (produtoExistente ? 'Adicionar ao Estoque' : 'Adicionar')}
-          </button>
+
+            {/* Coluna 2: Detalhes ou Feedback */}
+            <div>
+              {produtoExistente ? (
+                <div style={{
+                  backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  borderRadius: '12px',
+                  padding: '2rem'
+                }}>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                    <AlertCircle size={32} color="var(--accent-primary)" />
+                    <div>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--accent-primary)', marginBottom: '0.25rem' }}>Produto Encontrado!</h3>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>{produtoExistente.nome}</div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Estoque Atual: <b style={{ color: 'white' }}>{produtoExistente.quantidade}</b></div>
+                    </div>
+                  </div>
+
+                  {!isAddingToExisting ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingToExisting(true)}
+                      className="btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', background: 'var(--bg-primary)', border: '1px solid var(--accent-primary)', color: 'var(--accent-primary)' }}
+                    >
+                      <PlusCircle size={18} /> Adicionar Mais Estoque
+                    </button>
+                  ) : (
+                    <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
+                      <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Quantidade a Adicionar</label>
+                      <div style={{ display: 'flex', gap: '1rem' }}>
+                        <input
+                          type="number"
+                          value={quantidadeAdicional}
+                          onChange={(e) => setQuantidadeAdicional(parseInt(e.target.value) || 1)}
+                          className="input-field"
+                          min="1"
+                          required
+                          style={{ flex: 1, textAlign: 'center', fontSize: '1.1rem', fontWeight: 'bold' }}
+                        />
+                        <button type="submit" disabled={isSubmitting} className="btn-primary" style={{ padding: '0 2rem' }}>
+                          <Save size={18} /> Confirmar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {/* Quantidade Inicial */}
+                  <div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>
+                      <Box size={16} color="var(--accent-primary)" />
+                      Quantidade Inicial
+                    </label>
+                    <input
+                      type="number"
+                      value={quantidade}
+                      onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
+                      className="input-field"
+                      min="1"
+                      required
+                    />
+                  </div>
+
+                  <div style={{ paddingTop: '0' }}>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', fontSize: '1rem', padding: '1rem', marginTop: '1.4rem' }}
+                    >
+                      <Save size={20} />
+                      {isSubmitting ? 'Cadastrando...' : 'Cadastrar Produto'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
         </form>
       </div>
     </div>
