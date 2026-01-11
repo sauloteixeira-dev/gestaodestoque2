@@ -12,10 +12,7 @@ const CadastroProduto: React.FC = () => {
   const [quantidadeAdicional, setQuantidadeAdicional] = useState(1);
   const [isAddingToExisting, setIsAddingToExisting] = useState(false);
 
-  const capitalizarPrimeiraLetra = (texto: string): string => {
-    if (!texto) return texto;
-    return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
-  };
+
 
   const handleCodigoBarrasChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
@@ -25,7 +22,7 @@ const CadastroProduto: React.FC = () => {
 
     if (encontrado) {
       setProdutoExistente(encontrado);
-      setNome(capitalizarPrimeiraLetra(encontrado.nome));
+      setNome(encontrado.nome.toUpperCase());
     } else {
       setProdutoExistente(null);
       setNome('');
@@ -41,7 +38,7 @@ const CadastroProduto: React.FC = () => {
         setQuantidadeAdicional(1);
         setIsAddingToExisting(false);
       } else {
-        await adicionarProduto(codigoBarras, capitalizarPrimeiraLetra(nome), quantidade);
+        await adicionarProduto(codigoBarras, nome, quantidade);
         setCodigoBarras('');
         setNome('');
         setQuantidade(1);
@@ -95,8 +92,8 @@ const CadastroProduto: React.FC = () => {
                   <input
                     type="text"
                     value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    placeholder="Ex: Teclado Mecânico"
+                    onChange={(e) => setNome(e.target.value.toUpperCase())}
+                    placeholder="EX: TECLADO MECÂNICO"
                     className="input-field"
                     required
                   />

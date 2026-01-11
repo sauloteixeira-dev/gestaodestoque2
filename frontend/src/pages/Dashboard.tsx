@@ -1,17 +1,28 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Package, AlertTriangle, ShoppingCart, ArrowUpRight } from 'lucide-react';
+import { Package, AlertTriangle, ShoppingCart, ArrowUpRight, PlusCircle, MinusCircle } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
   const { saidas } = useSaida();
+  const [entradas, setEntradas] = React.useState<any[]>([]);
+  const navigate = useNavigate();
+
+  // Fetch Entradas
+  React.useEffect(() => {
+    fetch('http://localhost:3001/entradas-estoque')
+      .then(res => res.json())
+      .then(data => setEntradas(data))
+      .catch(err => console.error('Erro ao buscar entradas:', err));
+  }, []);
 
   // Process data for the chart (Last 30 days)
   const chartData = useMemo(() => {
     const days = 30;
-    const dataMap = new Map<string, number>();
+    const dataMap = new Map<string, { entrada: number, saida: number }>();
     const today = new Date();
 
     // 1. Initialize last 30 days with 0
@@ -19,7 +30,7 @@ const Dashboard: React.FC = () => {
       const d = new Date();
       d.setDate(today.getDate() - i);
       const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-      dataMap.set(dateStr, 0);
+      dataMap.set(dateStr, { entrada: 0, saida: 0 });
     }
 
     // 2. Aggregate REAL output data
@@ -28,40 +39,63 @@ const Dashboard: React.FC = () => {
       const date = new Date(saida.data_saida);
       const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 
-      // Only count if it's within our range
       if (dataMap.has(dateStr)) {
-        const totalItems = saida.itens?.reduce((acc, item) => acc + item.quantidade, 0) || 0;
-        dataMap.set(dateStr, (dataMap.get(dateStr) || 0) + totalItems);
+        const current = dataMap.get(dateStr)!;
+        const totalItems = saida.itens?.reduce((acc: number, item: any) => acc + item.quantidade, 0) || 0;
+        dataMap.set(dateStr, { ...current, saida: current.saida + totalItems });
       }
     });
 
-    // 3. Convert to array
-    return Array.from(dataMap).map(([name, out]) => ({ name, out }));
-  }, [saidas]);
+    // 3. Aggregate REAL input data
+    entradas.forEach(entrada => {
+      if (!entrada.data_entrada) return;
+      const date = new Date(entrada.data_entrada);
+      const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+
+      if (dataMap.has(dateStr)) {
+        const current = dataMap.get(dateStr)!;
+        dataMap.set(dateStr, { ...current, entrada: current.entrada + entrada.quantidade });
+      }
+    });
+
+    // 4. Convert to array
+    return Array.from(dataMap).map(([name, values]) => ({ name, ...values }));
+  }, [saidas, entradas]);
 
   if (loadingProdutos) {
     return <div style={{ padding: '2rem', color: 'var(--text-secondary)' }}>Carregando Dashboard...</div>;
   }
 
   // Calculate Stats
-  const totalProducts = produtos.length;
-  const criticalItems = produtos.filter(p => p.quantidade < 10).length;
+  const totalProducts = produtos.filter(p => p.quantidade > 0).length; // Apenas produtos em estoque
+  const criticalItems = produtos.filter(p => p.quantidade > 0 && p.quantidade < 10).length; // Itens críticos (1-9 unidades)
   const outOfStock = produtos.filter(p => p.quantidade === 0).length;
 
   return (
     <div className="dashboard-container">
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '1.8rem', fontWeight: 700, marginBottom: '0.5rem' }}>Visão Geral</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Aqui está o resumo do seu estoque hoje.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Aqui está o resumo do seu aplicativo hoje.</p>
       </div>
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-
+        {/* ... Cards ... (Keep existing cards logic if unchanged, but for brevity I'm keeping replacing the whole component logic block I selected) */}
         {/* Card 1 */}
-        <div className="card-base" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div
+          onClick={() => navigate('/estoque-baixo?filtro=estoque')}
+          className="card-base"
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            cursor: 'pointer'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total de Produtos</div>
+            <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Qtd. de Produtos</div>
             <div style={{ padding: '8px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '8px', color: '#60a5fa' }}>
               <Package size={20} />
             </div>
@@ -77,7 +111,7 @@ const Dashboard: React.FC = () => {
         {/* Card 2 */}
         <div className="card-base" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Movimentações</div>
+            <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Movimentações (Saída)</div>
             <div style={{ padding: '8px', backgroundColor: 'rgba(124, 58, 237, 0.1)', borderRadius: '8px', color: '#a78bfa' }}>
               <ShoppingCart size={20} />
             </div>
@@ -91,7 +125,18 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Card 3 */}
-        <div className="card-base" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div
+          onClick={() => navigate('/estoque-baixo?filtro=critico')}
+          className="card-base"
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            cursor: 'pointer'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Itens Críticos</div>
             <div style={{ padding: '8px', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderRadius: '8px', color: '#f87171' }}>
@@ -113,7 +158,18 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Card 4 */}
-        <div className="card-base" style={{ position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div
+          onClick={() => navigate('/estoque-baixo?filtro=baixo')}
+          className="card-base"
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            cursor: 'pointer'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <div style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sem Estoque</div>
             <div style={{ padding: '8px', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderRadius: '8px', color: '#fbbf24' }}>
@@ -135,21 +191,103 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-
-        {/* Chart Section */}
-        <div className="card-base" style={{ height: '400px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Movimentação de Saídas (Últimos 30 dias)</h3>
-            <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer' }}>Atualizado</button>
+      {/* Quick Actions Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        {/* Card: Cadastrar Produto */}
+        <div
+          onClick={() => navigate('/cadastrar')}
+          className="card-base"
+          style={{
+            height: '200px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            cursor: 'pointer',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <div style={{
+            padding: '20px',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderRadius: '50%',
+            marginBottom: '1rem'
+          }}>
+            <PlusCircle size={48} color="#60a5fa" />
           </div>
-          <ResponsiveContainer width="100%" height="80%">
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.5rem' }}>Cadastrar Produto</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textAlign: 'center' }}>Adicione novos produtos ao estoque</p>
+        </div>
+
+        {/* Card: Saída de Estoque */}
+        <div
+          onClick={() => navigate('/saida')}
+          className="card-base"
+          style={{
+            height: '200px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            cursor: 'pointer',
+            transition: 'transform 0.2s, box-shadow 0.2s',
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          <div style={{
+            padding: '20px',
+            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+            borderRadius: '50%',
+            marginBottom: '1rem'
+          }}>
+            <MinusCircle size={48} color="#a78bfa" />
+          </div>
+          <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '0.5rem' }}>Saída de Estoque</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textAlign: 'center' }}>Registre retiradas de produtos</p>
+        </div>
+      </div>
+
+      {/* Chart Section - Full Width */}
+      <div className="card-base" style={{ height: '300px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexShrink: 0 }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Movimentação de Estoque (30 dias)</h3>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+              <div style={{ width: 12, height: 12, borderRadius: 2, background: '#10b981' }}></div>
+              <span>Entradas</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem' }}>
+              <div style={{ width: 12, height: 12, borderRadius: 2, background: '#8b5cf6' }}></div>
+              <span>Saídas</span>
+            </div>
+          </div>
+        </div>
+        <div style={{ width: '100%', height: '220px' }}>
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
                   <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
@@ -159,49 +297,11 @@ const Dashboard: React.FC = () => {
                 contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '8px', color: '#f8fafc' }}
                 itemStyle={{ color: '#fff' }}
               />
-              <Area type="monotone" dataKey="out" name="Saída (Qtd)" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorOut)" />
+              <Area type="monotone" dataKey="entrada" name="Entrada (Qtd)" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorIn)" />
+              <Area type="monotone" dataKey="saida" name="Saída (Qtd)" stroke="#8b5cf6" strokeWidth={3} fillOpacity={1} fill="url(#colorOut)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
-
-        {/* Low Stock Table Preview */}
-        <div className="card-base" style={{ height: '400px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Itens Críticos (Top 5)</h3>
-            <a href="/estoque-baixo" style={{ color: 'var(--accent-primary)', textDecoration: 'none', fontSize: '0.875rem' }}>Ver Relatório</a>
-          </div>
-          <div style={{ overflowY: 'auto' }}>
-            <table style={{ width: '100%' }}>
-              <thead>
-                <tr>
-                  <th style={{ textAlign: 'left', paddingBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Produto</th>
-                  <th style={{ textAlign: 'right', paddingBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Nível</th>
-                  <th style={{ textAlign: 'right', paddingBottom: '1rem', color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {produtos.filter(p => p.quantidade <= 10).slice(0, 5).map(item => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
-                    <td style={{ padding: '0.75rem 0' }}>
-                      <div style={{ fontWeight: 500 }}>{item.nome}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{item.codigo_barras}</div>
-                    </td>
-                    <td style={{ textAlign: 'right', color: '#f87171', fontWeight: 600 }}>
-                      {item.quantidade} restantes
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '0.7rem', padding: '2px 8px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}>Crítico</span>
-                    </td>
-                  </tr>
-                ))}
-                {produtos.filter(p => p.quantidade <= 10).length === 0 && (
-                  <tr><td colSpan={3} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>Nenhum item crítico. Bom trabalho!</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
       </div>
     </div>
   );

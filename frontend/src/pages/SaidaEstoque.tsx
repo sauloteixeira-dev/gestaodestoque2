@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
 import { Search, Plus, Minus, Send } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();
@@ -12,6 +13,7 @@ const SaidaEstoque: React.FC = () => {
   const [itensSelecionados, setItensSelecionados] = useState<{ [key: number]: number }>({});
   const [termoBusca, setTermoBusca] = useState('');
   const [ocultarSemEstoque, setOcultarSemEstoque] = useState(false);
+  const [erros, setErros] = useState<{ local?: boolean; usuario?: boolean }>({});
 
   const capitalizarPrimeiraLetra = (texto: string): string => {
     if (!texto) return texto;
@@ -26,10 +28,22 @@ const SaidaEstoque: React.FC = () => {
   };
 
   const handleRegistrarSaida = async () => {
-    if (!localSelecionado || !usuario.trim()) {
-      alert('Selecione um local e informe o nome do usuário');
+    const novosErros: { local?: boolean; usuario?: boolean } = {};
+
+    if (!localSelecionado) {
+      novosErros.local = true;
+    }
+
+    if (!usuario.trim()) {
+      novosErros.usuario = true;
+    }
+
+    if (Object.keys(novosErros).length > 0) {
+      setErros(novosErros);
       return;
     }
+
+    setErros({});
 
     const itens = Object.entries(itensSelecionados)
       .filter(([, quantidade]) => quantidade > 0)
@@ -39,7 +53,7 @@ const SaidaEstoque: React.FC = () => {
       }));
 
     if (itens.length === 0) {
-      alert('Selecione pelo menos um item para retirada');
+      toast.error('⚠️ Selecione pelo menos um item para retirada');
       return;
     }
 
@@ -172,15 +186,16 @@ const SaidaEstoque: React.FC = () => {
               <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Local de Destino</label>
               <select
                 value={localSelecionado || ''}
-                onChange={(e) => setLocalSelecionado(parseInt(e.target.value))}
+                onChange={(e) => { setLocalSelecionado(parseInt(e.target.value)); setErros(prev => ({ ...prev, local: false })); }}
                 className="input-field"
-                style={{ appearance: 'none' }} // Custom arrow would be nice but default is ok
+                style={{ appearance: 'none', borderColor: erros.local ? '#ef4444' : undefined }}
               >
                 <option value="">Selecione...</option>
                 {locais.map(local => (
                   <option key={local.id} value={local.id}>{local.nome}</option>
                 ))}
               </select>
+              {erros.local && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem' }}>⚠️ Por favor, selecione um local de destino</p>}
             </div>
 
             <div>
@@ -188,10 +203,12 @@ const SaidaEstoque: React.FC = () => {
               <input
                 type="text"
                 value={usuario}
-                onChange={(e) => setUsuario(e.target.value)}
+                onChange={(e) => { setUsuario(e.target.value); setErros(prev => ({ ...prev, usuario: false })); }}
                 placeholder="Nome..."
                 className="input-field"
+                style={{ borderColor: erros.usuario ? '#ef4444' : undefined }}
               />
+              {erros.usuario && <p style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem' }}>⚠️ Por favor, preencha o nome do responsável</p>}
             </div>
 
             <div>
@@ -218,7 +235,6 @@ const SaidaEstoque: React.FC = () => {
 
               <button
                 onClick={handleRegistrarSaida}
-                disabled={!localSelecionado || !usuario.trim()}
                 className="btn-primary"
                 style={{ width: '100%', justifyContent: 'center' }}
               >

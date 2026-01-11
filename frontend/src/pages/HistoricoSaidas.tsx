@@ -45,8 +45,8 @@ const HistoricoSaidas: React.FC = () => {
     <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'end' }}>
         <div>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Histórico de Retiradas</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Log completo de movimentações.</p>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Comprovantes</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Histórico completo de movimentações.</p>
         </div>
         <div style={{ position: 'relative' }}>
           <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'var(--text-secondary)' }} />
@@ -72,7 +72,6 @@ const HistoricoSaidas: React.FC = () => {
                 padding: '1rem 1.5rem',
                 borderBottom: '1px solid var(--border-color)',
                 backgroundColor: 'rgba(0,0,0,0.2)',
-                fontSize: '0.8rem',
                 fontWeight: 600,
                 color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
@@ -158,7 +157,7 @@ const HistoricoSaidas: React.FC = () => {
                             </button>
                           </div>
 
-                          <table style={{ width: '100%', fontSize: '0.9rem' }}>
+                          <table style={{ width: '100%' }}>
                             <thead>
                               <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
                                 <th style={{ textAlign: 'left', padding: '0.75rem', color: 'var(--text-secondary)' }}>Produto</th>
@@ -176,7 +175,9 @@ const HistoricoSaidas: React.FC = () => {
                                   </td>
                                   <td style={{ padding: '0.75rem', fontFamily: 'monospace', color: 'var(--text-muted)' }}>{item.produto_codigo_barras}</td>
                                   <td style={{ padding: '0.75rem', textAlign: 'center', fontWeight: 700, color: 'var(--text-primary)' }}>{item.quantidade}</td>
-                                  <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-muted)' }}>{(item.produto_quantidade_antes || 0) - item.quantidade}</td>
+                                  <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--text-muted)' }}>
+                                    {item.produto_quantidade_antes ? (item.produto_quantidade_antes - item.quantidade) : '-'}
+                                  </td>
                                 </tr>
                               ))}
                             </tbody>
@@ -333,12 +334,36 @@ const HistoricoSaidas: React.FC = () => {
                     </div>
 
                     {/* Rodapé */}
-                    <div className="documento-footer" style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center' }}>
-                      <div className="assinatura" style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <div className="documento-footer" style={{ marginTop: 'auto', paddingTop: '40px' }}>
+                      {/* Resumo de Quantidades - Apenas na última página */}
+                      {pageIndex === chunks.length - 1 && (
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-around',
+                          marginBottom: '30px',
+                          padding: '15px',
+                          background: '#f9f9f9',
+                          border: '1px solid #ddd',
+                          borderRadius: '8px'
+                        }}>
+                          <div style={{ textAlign: 'center' }}>
+                            <p style={{ margin: '0 0 5px 0', fontSize: '9pt', color: '#666', textTransform: 'uppercase' }}>Quantidade de Produtos</p>
+                            <p style={{ margin: 0, fontSize: '14pt', fontWeight: 'bold', color: '#000' }}>{itens.length}</p>
+                          </div>
+                          <div style={{ textAlign: 'center' }}>
+                            <p style={{ margin: '0 0 5px 0', fontSize: '9pt', color: '#666', textTransform: 'uppercase' }}>Total de Itens</p>
+                            <p style={{ margin: 0, fontSize: '14pt', fontWeight: 'bold', color: '#000' }}>
+                              {itens.reduce((acc, item) => acc + item.quantidade, 0)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="assinatura" style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                         <div style={{ width: '60%', borderTop: '1px solid #000', marginBottom: '5px' }}></div>
                         <p style={{ fontWeight: 'bold', fontSize: '11pt', color: '#000', margin: 0 }}>Assinatura do Recebedor</p>
                       </div>
-                      <div className="data-documento" style={{ marginTop: '30px', fontSize: '9pt', color: '#666' }}>
+                      <div className="data-documento" style={{ marginTop: '30px', fontSize: '9pt', color: '#666', textAlign: 'center' }}>
                         <p>Documento gerado em: {formatarData(new Date().toISOString())}</p>
                       </div>
                     </div>

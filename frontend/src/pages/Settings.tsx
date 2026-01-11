@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useSaida } from '../context/SaidaContext';
 import { toast } from 'react-toastify';
-import { Plus, Trash2, MapPin } from 'lucide-react';
+import { Plus, MapPin } from 'lucide-react';
 
 const Settings: React.FC = () => {
-    const { locais, adicionarLocal, removerLocal } = useSaida();
+    const { locais, adicionarLocal } = useSaida();
     const [novoLocal, setNovoLocal] = useState('');
     const [novaDescricao, setNovaDescricao] = useState('');
     const [loading, setLoading] = useState(false);
@@ -33,16 +33,12 @@ const Settings: React.FC = () => {
         }
     };
 
-    const handleRemoverLocal = async (id: number) => {
-        if (window.confirm('Tem certeza que deseja remover este local?')) {
-            await removerLocal(id);
-        }
-    };
+
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Configurações</h1>
+                <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Parâmetros e Configurações</h1>
                 <p style={{ color: 'var(--text-secondary)' }}>Gerencie os parâmetros do sistema.</p>
             </div>
 
@@ -103,13 +99,6 @@ const Settings: React.FC = () => {
                                         <span style={{ fontWeight: 500 }}>{local.nome}</span>
                                         {local.descricao && <span style={{ color: 'var(--text-secondary)', marginLeft: '10px', fontSize: '0.9rem' }}>— {local.descricao}</span>}
                                     </div>
-                                    <button
-                                        onClick={() => handleRemoverLocal(local.id)}
-                                        style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
-                                        title="Remover"
-                                    >
-                                        <Trash2 size={18} />
-                                    </button>
                                 </div>
                             ))
                         ) : (

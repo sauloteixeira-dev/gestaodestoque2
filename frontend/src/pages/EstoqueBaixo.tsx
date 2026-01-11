@@ -1,16 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react'; // Add useEffect
+import { useSearchParams } from 'react-router-dom'; // Add useSearchParams
 import { useProdutos } from '../context/ProdutoContext';
-import brasao from '../../public/images/brasao.png';
-import crasLogo from '../../public/images/cras-logo.png';
-import { AlertTriangle, Printer } from 'lucide-react';
+const brasao = '/images/brasao.png';
+const crasLogo = '/images/cras-logo.png';
+import { AlertTriangle, Printer, Box, CheckCircle } from 'lucide-react'; // Add icons
 
 const EstoqueBaixo: React.FC = () => {
     const { produtos, loading } = useProdutos();
+    const [searchParams] = useSearchParams();
+    const [filtro, setFiltro] = useState<'todos' | 'estoque' | 'critico' | 'baixo'>(() => {
+        const filtroUrl = searchParams.get('filtro');
+        if (filtroUrl === 'baixo') return 'baixo';
+        if (filtroUrl === 'critico') return 'critico';
+        if (filtroUrl === 'estoque') return 'estoque';
+        return 'todos';
+    });
 
-    // Filtrar produtos com estoque baixo (ex: <= 5)
-    // Definir limite configurável se necessário, por enquanto hardcoded 5
+    // Atualizar filtro se a URL mudar (ex: navegação browser back/forward)
+    useEffect(() => {
+        const filtroUrl = searchParams.get('filtro');
+        if (filtroUrl === 'baixo') {
+            setFiltro('baixo');
+        } else if (filtroUrl === 'critico') {
+            setFiltro('critico');
+        } else if (filtroUrl === 'estoque') {
+            setFiltro('estoque');
+        } else {
+            setFiltro('todos');
+        }
+    }, [searchParams]);
+
     const limiteEstoque = 5;
-    const produtosBaixoEstoque = produtos.filter(p => p.quantidade <= limiteEstoque);
+
+    const produtosFiltrados = produtos.filter(p => {
+        if (filtro === 'baixo') {
+            return p.quantidade === 0; // Apenas itens sem estoque
+        }
+        if (filtro === 'critico') {
+            return p.quantidade > 0 && p.quantidade < 10; // Itens com estoque crítico
+        }
+        if (filtro === 'estoque') {
+            return p.quantidade > 0;
+        }
+        return true; // mostrar todos
+    });
 
     const formatarData = (dataString: string) => {
         return new Date(dataString).toLocaleString('pt-BR');
@@ -22,30 +55,109 @@ const EstoqueBaixo: React.FC = () => {
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '2rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Estoque Crítico</h1>
-                    <p style={{ color: 'var(--text-secondary)' }}>Relatório de itens que precisam de reposição.</p>
+                    <h1 style={{ fontSize: '1.8rem', fontWeight: 700 }}>Controle de Estoque</h1>
+                    <p style={{ color: 'var(--text-secondary)' }}>Gerencie e visualize todo o seu inventário.</p>
                 </div>
                 <button
                     onClick={() => window.print()}
                     className="btn-primary"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}
+                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
                 >
                     <Printer size={18} />
                     Imprimir Relatório
                 </button>
             </div>
 
+            {/* Filtros Toggle */}
+            <div style={{ marginBottom: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                {/* Grupo 1: Todos */}
+                <div className="card-base" style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem', width: 'fit-content' }}>
+                    <button
+                        onClick={() => setFiltro('todos')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: filtro === 'todos' ? 'var(--accent-primary)' : 'transparent',
+                            color: filtro === 'todos' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <Box size={16} /> TODOS
+                    </button>
+                </div>
+
+                {/* Grupo 2: Estoque | Crítico | Sem Estoque */}
+                <div className="card-base" style={{ padding: '0.5rem', display: 'flex', gap: '0.5rem', width: 'fit-content' }}>
+                    <button
+                        onClick={() => setFiltro('estoque')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: filtro === 'estoque' ? '#10b981' : 'transparent',
+                            color: filtro === 'estoque' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <CheckCircle size={16} /> ESTOQUE
+                    </button>
+                    <button
+                        onClick={() => setFiltro('critico')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: filtro === 'critico' ? '#f59e0b' : 'transparent',
+                            color: filtro === 'critico' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <AlertTriangle size={16} /> CRÍTICO
+                    </button>
+                    <button
+                        onClick={() => setFiltro('baixo')}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '6px',
+                            border: 'none',
+                            background: filtro === 'baixo' ? '#ef4444' : 'transparent',
+                            color: filtro === 'baixo' ? 'white' : 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}
+                    >
+                        <AlertTriangle size={16} /> SEM ESTOQUE
+                    </button>
+                </div>
+            </div>
+
             {/* Visualização em Tela (Tabela Simples) */}
             <div className="card-base">
-                {produtosBaixoEstoque.length === 0 ? (
+                {produtosFiltrados.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
                         <div style={{ marginBottom: '1rem', color: '#4ade80' }}>
-                            <AlertTriangle size={48} />
+                            <CheckCircle size={48} />
                         </div>
-                        <h3>Tudo certo!</h3>
-                        <p>Nenhum produto está com estoque baixo no momento.</p>
+                        <h3>Nenhum item encontrado</h3>
+                        <p>{filtro === 'baixo' ? 'Não há produtos sem estoque!' : filtro === 'critico' ? 'Não há produtos com estoque crítico!' : 'Nenhum produto cadastrado no sistema.'}</p>
                     </div>
                 ) : (
                     <div className="table-responsive">
@@ -59,17 +171,23 @@ const EstoqueBaixo: React.FC = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {produtosBaixoEstoque.map(produto => (
+                                {produtosFiltrados.map(produto => (
                                     <tr key={produto.id}>
                                         <td className="hide-mobile" style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{produto.codigo_barras}</td>
                                         <td style={{ fontWeight: 500 }}>{produto.nome}</td>
-                                        <td style={{ textAlign: 'center', color: '#f87171', fontWeight: 'bold' }}>
+                                        <td style={{ textAlign: 'center', fontWeight: 'bold', color: produto.quantidade <= 5 ? '#f87171' : 'var(--text-primary)' }}>
                                             {produto.quantidade}
                                         </td>
                                         <td style={{ textAlign: 'right' }}>
-                                            <span style={{ fontSize: '0.75rem', padding: '4px 12px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                                Repor Urgente
-                                            </span>
+                                            {produto.quantidade <= 5 ? (
+                                                <span style={{ fontSize: '0.75rem', padding: '4px 12px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.1)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                                    Repor
+                                                </span>
+                                            ) : (
+                                                <span style={{ fontSize: '0.75rem', padding: '4px 12px', borderRadius: '12px', background: 'rgba(74, 222, 128, 0.1)', color: '#4ade80', border: '1px solid rgba(74, 222, 128, 0.2)' }}>
+                                                    Normal
+                                                </span>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -82,12 +200,13 @@ const EstoqueBaixo: React.FC = () => {
             {/* Conteúdo Exclusivo para Impressão - MANTIDO LOGICA ORIGINAL COM APENAS AJUSTES MINIMOS DE CSS INLINE SE NECESSARIO, MAS A LOGICA DE CHUNKS É CRÍTICA */}
             <div className="print-layout">
                 {(() => {
-                    const ITENS_POR_PAGINA = 10;
-                    const itens = produtosBaixoEstoque;
+                    const ITENS_POR_PAGINA = 18;
+                    // Use produtosFiltrados here to print whatever is currently viewed
+                    const itens = produtosFiltrados;
                     // Se não tiver itens, não gera nada ou gera mensagem
                     if (itens.length === 0) return (
                         <div className="print-page">
-                            <p>Não há itens com estoque baixo para imprimir.</p>
+                            <p>Não há itens para imprimir.</p>
                         </div>
                     );
 
@@ -115,12 +234,22 @@ const EstoqueBaixo: React.FC = () => {
                             </div>
 
                             <div className="titulo-documento">
-                                <h2>Relatório de Estoque Baixo</h2>
+                                <h2>
+                                    {filtro === 'baixo' ? 'Relatório de Itens Sem Estoque' :
+                                        filtro === 'critico' ? 'Relatório de Estoque Crítico' :
+                                            filtro === 'estoque' ? 'Relatório de Estoque Disponível' :
+                                                'Relatório Geral de Estoque'}
+                                </h2>
                             </div>
 
                             {/* Tabela */}
                             <div className="tabela-container">
-                                <h3>Itens com Estoque Crítico (Página {pageIndex + 1}/{chunks.length})</h3>
+                                <h3>
+                                    {filtro === 'baixo' ? 'Itens Sem Estoque' :
+                                        filtro === 'critico' ? 'Itens com Estoque Crítico (< 10 unidades)' :
+                                            filtro === 'estoque' ? 'Itens em Estoque' :
+                                                'Todos os Itens'} (Página {pageIndex + 1}/{chunks.length})
+                                </h3>
                                 <table className="print-table">
                                     <thead>
                                         <tr>
@@ -138,6 +267,22 @@ const EstoqueBaixo: React.FC = () => {
                                             </tr>
                                         ))}
                                     </tbody>
+                                    {pageIndex === chunks.length - 1 && (
+                                        <tfoot>
+                                            <tr style={{ borderTop: '2px solid black', fontWeight: 'bold' }}>
+                                                <td colSpan={2} style={{ textAlign: 'right', paddingRight: '10px' }}>QUANTIDADE DE PRODUTOS:</td>
+                                                <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                                                    {itens.length}
+                                                </td>
+                                            </tr>
+                                            <tr style={{ fontWeight: 'bold' }}>
+                                                <td colSpan={2} style={{ textAlign: 'right', paddingRight: '10px' }}>TOTAL DE ITENS:</td>
+                                                <td style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '14px' }}>
+                                                    {itens.reduce((sum, item) => sum + item.quantidade, 0)}
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    )}
                                 </table>
                             </div>
 
