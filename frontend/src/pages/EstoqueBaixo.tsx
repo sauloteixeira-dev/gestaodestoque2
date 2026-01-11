@@ -1,7 +1,5 @@
 import React from 'react';
 import { useProdutos } from '../context/ProdutoContext';
-import brasao from '../../public/images/brasao.png';
-import crasLogo from '../../public/images/cras-logo.png';
 
 const EstoqueBaixo: React.FC = () => {
     const { produtos, loading } = useProdutos();
@@ -103,14 +101,14 @@ const EstoqueBaixo: React.FC = () => {
                             {/* Cabeçalho */}
                             <div className="print-header">
                                 <div className="logo-esq">
-                                    <img src={brasao} alt="Brasão Alfenas" />
+                                    <img src="/images/brasao.png" alt="Brasão Alfenas" />
                                 </div>
                                 <div className="titulo-centro">
                                     <h2>Prefeitura Municipal de Alfenas</h2>
                                     <h3>Secretaria de Ação Social</h3>
                                 </div>
                                 <div className="logo-dir">
-                                    <img src={crasLogo} alt="Logo CRAS" />
+                                    <img src="/images/cras-logo.png" alt="Logo CRAS" />
                                 </div>
                             </div>
 

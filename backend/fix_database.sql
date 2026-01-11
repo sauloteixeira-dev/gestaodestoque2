@@ -47,32 +47,57 @@ ALTER TABLE saidas_estoque ENABLE ROW LEVEL SECURITY;
 ALTER TABLE itens_saida ENABLE ROW LEVEL SECURITY;
 
 -- 6. Criar políticas de acesso para usuários autenticados
+-- Remover políticas existentes se houver e criar novas
+DO $$
+BEGIN
+    -- logs_exclusao
+    DROP POLICY IF EXISTS "Permitir leitura de logs para autenticados" ON logs_exclusao;
+    DROP POLICY IF EXISTS "Permitir inserção de logs para autenticados" ON logs_exclusao;
+
+    -- locais_saida
+    DROP POLICY IF EXISTS "Permitir leitura de locais para autenticados" ON locais_saida;
+    DROP POLICY IF EXISTS "Permitir inserção de locais para autenticados" ON locais_saida;
+    DROP POLICY IF EXISTS "Permitir atualização de locais para autenticados" ON locais_saida;
+
+    -- saidas_estoque
+    DROP POLICY IF EXISTS "Permitir leitura de saidas para autenticados" ON saidas_estoque;
+    DROP POLICY IF EXISTS "Permitir inserção de saidas para autenticados" ON saidas_estoque;
+
+    -- itens_saida
+    DROP POLICY IF EXISTS "Permitir leitura de itens para autenticados" ON itens_saida;
+    DROP POLICY IF EXISTS "Permitir inserção de itens para autenticados" ON itens_saida;
+END $$;
+
+-- Criar políticas
 -- logs_exclusao
-CREATE POLICY IF NOT EXISTS "Permitir leitura de logs para autenticados" ON logs_exclusao
+CREATE POLICY "Permitir leitura de logs para autenticados" ON logs_exclusao
     FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY IF NOT EXISTS "Permitir inserção de logs para autenticados" ON logs_exclusao
+CREATE POLICY "Permitir inserção de logs para autenticados" ON logs_exclusao
     FOR INSERT TO authenticated WITH CHECK (true);
 
 -- locais_saida
-CREATE POLICY IF NOT EXISTS "Permitir leitura de locais para autenticados" ON locais_saida
+CREATE POLICY "Permitir leitura de locais para autenticados" ON locais_saida
     FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY IF NOT EXISTS "Permitir inserção de locais para autenticados" ON locais_saida
+CREATE POLICY "Permitir inserção de locais para autenticados" ON locais_saida
     FOR INSERT TO authenticated WITH CHECK (true);
 
+CREATE POLICY "Permitir atualização de locais para autenticados" ON locais_saida
+    FOR UPDATE TO authenticated USING (true);
+
 -- saidas_estoque
-CREATE POLICY IF NOT EXISTS "Permitir leitura de saidas para autenticados" ON saidas_estoque
+CREATE POLICY "Permitir leitura de saidas para autenticados" ON saidas_estoque
     FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY IF NOT EXISTS "Permitir inserção de saidas para autenticados" ON saidas_estoque
+CREATE POLICY "Permitir inserção de saidas para autenticados" ON saidas_estoque
     FOR INSERT TO authenticated WITH CHECK (true);
 
 -- itens_saida
-CREATE POLICY IF NOT EXISTS "Permitir leitura de itens para autenticados" ON itens_saida
+CREATE POLICY "Permitir leitura de itens para autenticados" ON itens_saida
     FOR SELECT TO authenticated USING (true);
 
-CREATE POLICY IF NOT EXISTS "Permitir inserção de itens para autenticados" ON itens_saida
+CREATE POLICY "Permitir inserção de itens para autenticados" ON itens_saida
     FOR INSERT TO authenticated WITH CHECK (true);
 
 -- ===========================================================
