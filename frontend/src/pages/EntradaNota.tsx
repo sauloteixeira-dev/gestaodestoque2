@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { XMLParser } from 'fast-xml-parser';
-import { Upload, Check, AlertCircle, FileText, PackagePlus } from 'lucide-react';
+import { Upload, Check, FileText, PackagePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ProdutoNota {
@@ -16,7 +16,6 @@ const EntradaNota: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [fileName, setFileName] = useState('');
     const [chaveAcesso, setChaveAcesso] = useState('');
-    const { adicionarProduto } = useProdutos();
     const navigate = useNavigate();
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {

@@ -30,7 +30,6 @@ const EstoqueBaixo: React.FC = () => {
         }
     }, [searchParams]);
 
-    const limiteEstoque = 5;
 
     const produtosFiltrados = produtos.filter(p => {
         if (filtro === 'baixo') {

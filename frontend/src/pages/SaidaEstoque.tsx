@@ -58,7 +58,7 @@ const SaidaEstoque: React.FC = () => {
     }
 
     try {
-      await registrarSaida(localSelecionado, capitalizarPrimeiraLetra(usuario), itens, observacoes);
+      await registrarSaida(localSelecionado!, capitalizarPrimeiraLetra(usuario), itens, observacoes);
       setLocalSelecionado(null);
       setUsuario('');
       setObservacoes('');
