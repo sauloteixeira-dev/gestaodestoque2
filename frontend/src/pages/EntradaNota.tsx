@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useProdutos } from '../context/ProdutoContext';
+
 import { XMLParser } from 'fast-xml-parser';
 import { Upload, Check, FileText, PackagePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
