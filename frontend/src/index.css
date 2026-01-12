@@ -340,15 +340,12 @@ body {
 }
 
 .nav-item:hover {
-  background-color: var(--hover-bg);
   color: var(--text-primary);
-  border-color: var(--border-subtle);
 }
 
 .nav-item.active {
-  background-color: var(--accent-subtle);
-  color: var(--accent-primary);
-  border-color: var(--border-accent);
+  background-color: rgba(59, 130, 246, 0.15);
+  color: #ffffff;
 }
 
 .user-profile {
