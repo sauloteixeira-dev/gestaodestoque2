@@ -1,50 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useSaida } from '../context/SaidaContext';
 import { type SaidaEstoque } from '../types';
-import Pagination from '../components/Pagination';
-import { Search } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 10;
 
 const HistoricoSaidas: React.FC = () => {
   const { saidas, loading } = useSaida();
   const [saidaSelecionada, setSaidaSelecionada] = useState<SaidaEstoque | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dataFiltro, setDataFiltro] = useState('');
-
-  const filteredSaidas = useMemo(() => {
-    let filtered = saidas;
-
-    // Aplicar filtro de texto
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(saida =>
-        saida.local?.nome.toLowerCase().includes(term) ||
-        saida.usuario_retirada.toLowerCase().includes(term)
-      );
-    }
-
-    // Aplicar filtro de data
-    if (dataFiltro) {
-      filtered = filtered.filter(saida => {
-        const dataSaida = new Date(saida.data_saida);
-        const dataFiltroInicio = new Date(dataFiltro + 'T00:00:00');
-        const dataFiltroFim = new Date(dataFiltro + 'T23:59:59');
-        return dataSaida >= dataFiltroInicio && dataSaida <= dataFiltroFim;
-      });
-    }
-
-    return filtered;
-  }, [saidas, searchTerm, dataFiltro]);
-
-  const paginatedSaidas = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return filteredSaidas.slice(startIndex, endIndex);
-  }, [filteredSaidas, currentPage]);
-
-  const totalPages = Math.ceil(filteredSaidas.length / ITEMS_PER_PAGE);
 
   const formatarData = (dataString: string) => {
     return new Date(dataString).toLocaleString('pt-BR');
@@ -64,116 +25,52 @@ const HistoricoSaidas: React.FC = () => {
   }
 
   return (
-    <div>
-      <div className="page-header">
-        <h1 className="page-title">Comprovantes de Saída</h1>
-        <p className="page-subtitle">Histórico de movimentações de estoque</p>
-      </div>
+    <div className="historico-saidas-container">
+      <div className="card">
+        <h2>Histórico de Saídas de Estoque</h2>
 
-      <div className="card-base">
         {saidas.length > 0 ? (
-          <>
-            <div style={{
-              display: 'flex',
-              gap: 'var(--space-3)',
-              marginBottom: 'var(--space-4)',
-              flexWrap: 'wrap',
-              alignItems: 'flex-end'
-            }}>
-              <div style={{ position: 'relative', flex: '1 1 300px', minWidth: '250px' }}>
-                <Search
-                  size={18}
-                  style={{
-                    position: 'absolute',
-                    left: 'var(--space-3)',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    color: 'var(--text-muted)',
-                    pointerEvents: 'none'
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="Buscar por local ou responsável..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="input-field"
-                  style={{
-                    paddingLeft: 'calc(var(--space-3) + 24px)'
-                  }}
-                />
-              </div>
+          <div className="saidas-list">
+            {saidas.map(saida => (
+              <div key={saida.id} className="saida-item">
+                <div className="saida-header">
+                  <div className="saida-info">
+                    <h3>{saida.local?.nome || 'Local não informado'}</h3>
+                    <p>Usuário: {saida.usuario_retirada}</p>
+                    <p>Data: {formatarData(saida.data_saida)}</p>
+                  </div>
+                  <button
+                    onClick={() => gerarDocumento(saida)}
+                    className="btn-gerar-doc"
+                  >
+                    📄 Gerar Documento
+                  </button>
+                </div>
 
-              <input
-                type="date"
-                value={dataFiltro}
-                onChange={(e) => {
-                  setDataFiltro(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="input-field"
-                style={{ width: '180px' }}
-              />
-            </div>
-            <div className="table-responsive">
-              <table>
-              <thead>
-                <tr>
-                  <th>Data/Hora</th>
-                  <th>Local</th>
-                  <th>Responsável</th>
-                  <th style={{ textAlign: 'center' }}>Itens</th>
-                  <th style={{ textAlign: 'right' }}>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedSaidas.map(saida => (
-                  <tr key={saida.id}>
-                    <td className="mono">{formatarData(saida.data_saida)}</td>
-                    <td>{saida.local?.nome || 'Local não informado'}</td>
-                    <td>{saida.usuario_retirada}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className="mono" style={{
-                        fontWeight: 'var(--font-semibold)',
-                        color: 'var(--text-primary)'
-                      }}>
-                        {saida.itens?.length || 0}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        onClick={() => gerarDocumento(saida)}
-                        className="btn-secondary"
-                        style={{
-                          padding: 'var(--space-2) var(--space-3)',
-                          fontSize: 'var(--text-sm)'
-                        }}
-                      >
-                        📄 Ver Comprovante
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-            </div>
-          </>
-        ) : (
-          <div style={{
-            textAlign: 'center',
-            padding: 'var(--space-8)',
-            color: 'var(--text-muted)'
-          }}>
-            Nenhuma saída registrada ainda.
+                {saida.observacoes && (
+                  <div className="observacoes">
+                    <strong>Observações:</strong> {saida.observacoes}
+                  </div>
+                )}
+
+                <div className="itens-saida">
+                  <h4>Itens Retirados:</h4>
+                  <ul>
+                    {saida.itens?.map((item, index) => (
+                      <li key={index}>
+                        <span className="item-nome">{item.produto_nome}</span>
+                        <span className="item-codigo">Cód: {item.produto_codigo_barras}</span>
+                        <span className="item-quantidade">Qtd: {item.quantidade}</span>
+                        <span className="item-estoque-anterior">Estoque anterior: {item.produto_quantidade_antes}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
           </div>
+        ) : (
+          <p>Nenhuma saída registrada ainda.</p>
         )}
       </div>
 

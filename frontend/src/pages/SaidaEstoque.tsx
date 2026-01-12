@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
-
+import { Package, Minus, Plus, LogOut } from 'lucide-react';
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();
@@ -54,93 +54,81 @@ const SaidaEstoque: React.FC = () => {
     }
   };
 
+  const totalItens = Object.values(itensSelecionados).reduce((acc, qtd) => acc + qtd, 0);
+
   return (
-    <div className="saida-estoque-container">
-      <div className="card">
-        <h2>Registrar Saída de Estoque</h2>
+    <div>
+      <div className="page-header">
+        <h1 className="page-title">Saída de Produtos</h1>
+        <p className="page-subtitle">Selecione os produtos e registre a movimentação</p>
+      </div>
 
-        {/* Seleção de Local */}
-        <div className="form-group">
-          <label>Local de Destino</label>
-          <div className="local-selection">
-            <select
-              value={localSelecionado || ''}
-              onChange={(e) => setLocalSelecionado(parseInt(e.target.value))}
-              className="local-select"
-            >
-              <option value="">Selecione um local...</option>
-              {locais.map(local => (
-                <option key={local.id} value={local.id}>
-                  {local.nome}
-                </option>
-              ))}
-            </select>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gap: 'var(--space-4)',
+        alignItems: 'start'
+      }} className="responsive-grid-2">
+        {/* COLUNA ESQUERDA - Seleção de Produtos */}
+        <div className="card-base">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-3)',
+            marginBottom: 'var(--space-4)'
+          }}>
+            <div className="icon-container">
+              <Package size={20} />
+            </div>
+            <h2 style={{
+              fontSize: 'var(--text-lg)',
+              fontWeight: 'var(--font-semibold)',
+              color: 'var(--text-primary)'
+            }}>
+              Selecionar Produtos
+            </h2>
           </div>
-        </div>
 
-        {/* Informações da Retirada */}
-        <div className="form-group">
-          <label>Nome do Responsável</label>
-          <input
-            type="text"
-            value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
-            placeholder="Nome de quem está retirando"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Observações (opcional)</label>
-          <textarea
-            value={observacoes}
-            onChange={(e) => setObservacoes(e.target.value)}
-            placeholder="Observações sobre a retirada"
-            rows={3}
-          />
-        </div>
-
-        <button
-          onClick={handleRegistrarSaida}
-          className="btn-registrar-saida"
-          disabled={!localSelecionado || !usuario.trim()}
-          style={{ marginTop: '20px', marginBottom: '30px' }}
-        >
-          Registrar Saída
-        </button>
-
-        {/* Seleção de Produtos */}
-        <div className="produtos-section">
-          <h3>Selecionar Produtos</h3>
-
-          <div className="search-bar" style={{ marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <input
-              type="text"
-              placeholder="🔍 Buscar produto por nome ou código..."
-              value={termoBusca}
-              onChange={(e) => setTermoBusca(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                fontSize: '16px',
-                borderRadius: '8px',
-                border: '1px solid #444',
-                background: '#2a2a2e',
-                color: 'white'
-              }}
-            />
-
-            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#ccc', cursor: 'pointer', fontSize: '0.9em' }}>
+          <div style={{ marginBottom: 'var(--space-4)' }}>
+            <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               <input
-                type="checkbox"
-                checked={ocultarSemEstoque}
-                onChange={(e) => setOcultarSemEstoque(e.target.checked)}
-                style={{ width: 'auto' }}
+                type="text"
+                placeholder="Digitar nome ou código do produto..."
+                value={termoBusca}
+                onChange={(e) => setTermoBusca(e.target.value)}
+                className="input-field"
+                style={{ flex: 1, marginBottom: 0 }}
               />
-              Ocultar produtos sem estoque (Qtd = 0)
-            </label>
+              <label style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: 'var(--text-sm)',
+                whiteSpace: 'nowrap'
+              }}>
+                <label className="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={ocultarSemEstoque}
+                    onChange={(e) => setOcultarSemEstoque(e.target.checked)}
+                  />
+                  <span className="toggle-slider"></span>
+                </label>
+                Ocultar produtos sem estoque
+              </label>
+            </div>
           </div>
 
-          <div className="produtos-list" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-2)',
+            maxHeight: '400px',
+            overflowY: 'auto',
+            paddingRight: 'var(--space-2)'
+          }}>
             {produtos
               .filter(p =>
                 (p.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
@@ -148,32 +136,57 @@ const SaidaEstoque: React.FC = () => {
                 (!ocultarSemEstoque || p.quantidade > 0)
               )
               .map(produto => (
-                <div key={produto.id} className="produto-item-lista" style={{
+                <div key={produto.id} style={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: '15px',
-                  background: '#2a2a2e',
-                  borderRadius: '8px',
-                  border: '1px solid #444'
+                  padding: 'var(--space-4)',
+                  background: 'var(--surface-raised)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-subtle)',
+                  transition: 'border-color 0.15s ease'
                 }}>
-                  <div className="produto-info" style={{ flex: 1 }}>
-                    <strong style={{ fontSize: '1.1em', display: 'block', marginBottom: '4px', color: 'white' }}>{produto.nome}</strong>
-                    <div style={{ fontSize: '0.9em', color: '#aaa' }}>
-                      <span style={{ marginRight: '15px' }}>Cód: {produto.codigo_barras}</span>
-                      <span style={{ color: produto.quantidade > 0 ? '#4caf50' : '#f44336' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{
+                      fontSize: 'var(--text-base)',
+                      fontWeight: 'var(--font-semibold)',
+                      color: 'var(--text-primary)',
+                      marginBottom: 'var(--space-1)'
+                    }}>
+                      {produto.nome}
+                    </div>
+                    <div style={{
+                      fontSize: 'var(--text-sm)',
+                      color: 'var(--text-muted)',
+                      display: 'flex',
+                      gap: 'var(--space-4)',
+                      fontFamily: 'var(--font-mono)'
+                    }}>
+                      <span>Cód: {produto.codigo_barras}</span>
+                      <span style={{
+                        color: produto.quantidade > 0 ? 'var(--status-success)' : 'var(--status-error)'
+                      }}>
                         Estoque: {produto.quantidade}
                       </span>
                     </div>
                   </div>
 
-                  <div className="quantidade-control" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
                     <button
                       onClick={() => handleQuantidadeChange(produto.id, Math.max(0, (itensSelecionados[produto.id] || 0) - 1))}
                       disabled={(itensSelecionados[produto.id] || 0) === 0}
-                      style={{ width: '40px', height: '40px', borderRadius: '50%', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2em' }}
+                      className="btn-secondary"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 'unset'
+                      }}
                     >
-                      -
+                      <Minus size={16} />
                     </button>
                     <input
                       type="number"
@@ -181,25 +194,154 @@ const SaidaEstoque: React.FC = () => {
                       onChange={(e) => handleQuantidadeChange(produto.id, parseInt(e.target.value) || 0)}
                       min="0"
                       max={produto.quantidade}
-                      style={{ width: '60px', textAlign: 'center', padding: '8px', margin: '0' }}
+                      className="input-field mono"
+                      style={{
+                        width: '64px',
+                        textAlign: 'center',
+                        padding: 'var(--space-2)',
+                        fontWeight: 'var(--font-semibold)'
+                      }}
                     />
                     <button
                       onClick={() => handleQuantidadeChange(produto.id, Math.min(produto.quantidade, (itensSelecionados[produto.id] || 0) + 1))}
                       disabled={(itensSelecionados[produto.id] || 0) >= produto.quantidade}
-                      style={{ width: '40px', height: '40px', borderRadius: '50%', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2em' }}
+                      className="btn-secondary"
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        padding: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: 'unset'
+                      }}
                     >
-                      +
+                      <Plus size={16} />
                     </button>
                   </div>
                 </div>
               ))}
-            {produtos.filter(p => p.nome.toLowerCase().includes(termoBusca.toLowerCase())).length === 0 && (
-              <p style={{ textAlign: 'center', color: '#aaa', padding: '20px' }}>Nenhum produto encontrado.</p>
-            )}
+            {produtos.filter(p =>
+              (p.nome.toLowerCase().includes(termoBusca.toLowerCase()) ||
+                p.codigo_barras?.toLowerCase().includes(termoBusca.toLowerCase())) &&
+              (!ocultarSemEstoque || p.quantidade > 0)
+            ).length === 0 && (
+                <div style={{
+                  textAlign: 'center',
+                  color: 'var(--text-muted)',
+                  padding: 'var(--space-6)',
+                  fontSize: 'var(--text-sm)'
+                }}>
+                  Nenhum produto encontrado.
+                </div>
+              )}
           </div>
         </div>
 
+        {/* COLUNA DIREITA - Formulário de Registro */}
+        <div style={{ position: 'sticky', top: 'var(--space-4)' }} className="form-sticky">
+          <div className="card-base">
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              marginBottom: 'var(--space-5)'
+            }}>
+              <div className="icon-container">
+                <LogOut size={20} />
+              </div>
+              <h2 style={{
+                fontSize: 'var(--text-lg)',
+                fontWeight: 'var(--font-semibold)',
+                color: 'var(--text-primary)'
+              }}>
+                Registrar Saída
+              </h2>
+            </div>
 
+            {/* Resumo dos Itens Selecionados */}
+            {totalItens > 0 && (
+              <div style={{
+                padding: 'var(--space-3)',
+                background: 'var(--surface-raised)',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-subtle)',
+                marginBottom: 'var(--space-4)'
+              }}>
+                <div style={{
+                  fontSize: 'var(--text-sm)',
+                  color: 'var(--text-secondary)',
+                  marginBottom: 'var(--space-2)'
+                }}>
+                  Itens selecionados
+                </div>
+                <div style={{
+                  fontSize: 'var(--text-xl)',
+                  fontWeight: 'var(--font-semibold)',
+                  color: 'var(--accent-primary)',
+                  fontFamily: 'var(--font-mono)'
+                }}>
+                  {totalItens} {totalItens === 1 ? 'item' : 'itens'}
+                </div>
+              </div>
+            )}
+
+            <div className="form-group">
+              <label className="label">
+                Local de Destino
+              </label>
+              <select
+                value={localSelecionado || ''}
+                onChange={(e) => setLocalSelecionado(parseInt(e.target.value))}
+                className="input-field"
+              >
+                <option value="">selecionar local</option>
+                {locais.map(local => (
+                  <option key={local.id} value={local.id}>
+                    {local.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="label">
+                Nome do Responsável
+              </label>
+              <input
+                type="text"
+                value={usuario}
+                onChange={(e) => setUsuario(e.target.value)}
+                placeholder="Nome do responsável pela retirada"
+                className="input-field"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="label">
+                Observações (opcional)
+              </label>
+              <textarea
+                value={observacoes}
+                onChange={(e) => setObservacoes(e.target.value)}
+                placeholder="Observações sobre a retirada"
+                rows={4}
+                className="input-field"
+                style={{ resize: 'vertical', minHeight: '100px' }}
+              />
+            </div>
+
+            <button
+              onClick={handleRegistrarSaida}
+              className="btn-primary"
+              disabled={!localSelecionado || !usuario.trim() || totalItens === 0}
+              style={{ marginTop: 'var(--space-4)', width: '100%', height: '48px' }}
+            >
+              <LogOut size={18} />
+              Registrar Saída
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

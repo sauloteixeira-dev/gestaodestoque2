@@ -1,47 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-
+import { Menu } from 'lucide-react';
 
 const Layout: React.FC = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <div className="layout">
-      {/* Overlay para mobile */}
+    <div className="layout-container">
       {isSidebarOpen && (
-        <div
-          className="sidebar-overlay"
-          onClick={closeSidebar}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 999,
-            display: 'none' // Será sobrescrito pelo media query
-          }}
-        />
+        <div className="mobile-overlay" onClick={closeSidebar} />
       )}
-
-      <div className="mobile-topbar" style={{ justifyContent: 'flex-end' }}>
-        <button
-          className="mobile-menu-btn"
-          onClick={toggleSidebar}
-          aria-label="Menu"
-        >
-          ☰
-        </button>
-      </div>
 
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
-      <main className="content">
+      <main className="content-area">
+        <div className="mobile-header">
+          <button
+            onClick={toggleSidebar}
+            className="btn-secondary"
+            style={{ padding: 'var(--space-2) var(--space-3)' }}
+          >
+            <Menu size={20} />
+            <span>Menu</span>
+          </button>
+        </div>
+
         <Outlet />
       </main>
     </div>
