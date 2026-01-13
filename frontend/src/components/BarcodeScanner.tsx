@@ -13,11 +13,17 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const [cameras, setCameras] = useState<any[]>([]);
   const [selectedCamera, setSelectedCamera] = useState<string>('');
+  const [isStopping, setIsStopping] = useState(false);
 
+  // Efeito para buscar câmeras ao montar
   useEffect(() => {
-    // Buscar câmeras disponíveis
-    Html5Qrcode.getCameras()
-      .then((devices) => {
+    let mounted = true;
+
+    const initCameras = async () => {
+      try {
+        const devices = await Html5Qrcode.getCameras();
+        if (!mounted) return;
+
         if (devices && devices.length > 0) {
           setCameras(devices);
           // Preferir câmera traseira se disponível
@@ -26,78 +32,118 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
         } else {
           setError('Nenhuma câmera encontrada no dispositivo.');
         }
-      })
-      .catch((err) => {
-        console.error('Erro ao buscar câmeras:', err);
-        setError('Não foi possível acessar as câmeras do dispositivo.');
-      });
+      } catch (err) {
+        if (mounted) {
+          console.error('Erro ao buscar câmeras:', err);
+          setError('Não foi possível acessar as câmeras do dispositivo.');
+        }
+      }
+    };
+
+    initCameras();
 
     return () => {
-      stopScanning();
+      mounted = false;
+      // Cleanup de emergência se desmontar enquanto escaneia
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch(console.error);
+      }
     };
   }, []);
 
+  // Efeito paara iniciar scanner quando selecionar câmera
   useEffect(() => {
-    if (selectedCamera && !isScanning) {
-      startScanning();
-    }
+    let mounted = true;
+
+    const start = async () => {
+      if (!selectedCamera || isScanning || isStopping) return;
+
+      try {
+        // Garantir que a instância anterior foi limpa
+        if (scannerRef.current) {
+          await scannerRef.current.clear();
+        }
+
+        const scanner = new Html5Qrcode('barcode-reader');
+        scannerRef.current = scanner;
+
+        await scanner.start(
+          selectedCamera,
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 150 },
+            aspectRatio: 1.777778
+          },
+          async (decodedText) => {
+            if (!mounted) return;
+            // Código de barras detectado
+            await handleStopAndClose(decodedText);
+          },
+          () => {
+            // Erro silencioso durante scan frame
+          }
+        );
+
+        if (mounted) {
+          setIsScanning(true);
+          setError(null);
+        }
+      } catch (err: any) {
+        if (mounted) {
+          console.error('Erro ao iniciar scanner:', err);
+          setError(err.message || 'Erro ao iniciar a câmera.');
+          setIsScanning(false);
+        }
+      }
+    };
+
+    start();
+
+    return () => {
+      mounted = false;
+    };
   }, [selectedCamera]);
 
-  const startScanning = async () => {
-    if (!selectedCamera || isScanning) return;
+  const handleStopAndClose = async (scannedCode?: string) => {
+    if (isStopping || !scannerRef.current) return;
+
+    setIsStopping(true);
 
     try {
-      const scanner = new Html5Qrcode('barcode-reader');
-      scannerRef.current = scanner;
-
-      await scanner.start(
-        selectedCamera,
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 150 },
-          aspectRatio: 1.777778
-        },
-        (decodedText) => {
-          // Código de barras detectado com sucesso
-          onScan(decodedText);
-          stopScanning();
-          onClose();
-        },
-        () => {
-          // Erro durante a leitura (normal enquanto procura código)
-          // Não exibir erro aqui
-        }
-      );
-
-      setIsScanning(true);
-      setError(null);
-    } catch (err: any) {
-      console.error('Erro ao iniciar scanner:', err);
-      setError(err.message || 'Erro ao iniciar a câmera.');
-      setIsScanning(false);
-    }
-  };
-
-  const stopScanning = async () => {
-    if (scannerRef.current && isScanning) {
-      try {
+      if (scannerRef.current.isScanning) {
         await scannerRef.current.stop();
-        scannerRef.current = null;
-        setIsScanning(false);
-      } catch (err) {
-        console.error('Erro ao parar scanner:', err);
       }
+      await scannerRef.current.clear();
+      scannerRef.current = null;
+    } catch (err) {
+      console.error('Erro ao parar scanner:', err);
+    } finally {
+      setIsScanning(false);
+      setIsStopping(false);
+      if (scannedCode) {
+        onScan(scannedCode);
+      }
+      onClose();
     }
-  };
-
-  const handleClose = async () => {
-    await stopScanning();
-    onClose();
   };
 
   const handleCameraChange = async (cameraId: string) => {
-    await stopScanning();
-    setSelectedCamera(cameraId);
+    if (isStopping) return;
+    setIsStopping(true);
+
+    try {
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        await scannerRef.current.stop();
+        await scannerRef.current.clear();
+      }
+      scannerRef.current = null;
+      setIsScanning(false);
+      setSelectedCamera(cameraId);
+    } catch (err) {
+      console.error('Erro ao trocar câmera:', err);
+    } finally {
+      setIsStopping(false);
+    }
   };
 
   return (
@@ -132,21 +178,21 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
           </h2>
         </div>
         <button
-          onClick={handleClose}
+          onClick={() => handleStopAndClose()}
+          disabled={isStopping}
           style={{
             background: 'rgba(255, 255, 255, 0.1)',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             borderRadius: 'var(--radius-md)',
             padding: 'var(--space-2)',
             color: 'white',
-            cursor: 'pointer',
+            cursor: isStopping ? 'wait' : 'pointer',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            opacity: isStopping ? 0.5 : 1
           }}
-          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
         >
           <X size={24} />
         </button>
@@ -162,6 +208,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
           <select
             value={selectedCamera}
             onChange={(e) => handleCameraChange(e.target.value)}
+            disabled={isStopping}
             style={{
               width: '100%',
               padding: 'var(--space-3)',
@@ -170,7 +217,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
               borderRadius: 'var(--radius-md)',
               color: 'var(--text-primary)',
               fontSize: 'var(--text-sm)',
-              cursor: 'pointer'
+              cursor: isStopping ? 'wait' : 'pointer'
             }}
           >
             {cameras.map((camera) => (
@@ -190,9 +237,28 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScan, onClose }) => {
         borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
         border: '2px solid var(--accent-primary)',
-        boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)'
+        boxShadow: '0 0 20px rgba(59, 130, 246, 0.5)',
+        position: 'relative',
+        minHeight: '300px'
       }}>
         <div id="barcode-reader" style={{ width: '100%' }}></div>
+        {isStopping && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'white'
+          }}>
+            <span className="loading-spinner"></span>
+            <span style={{ marginLeft: '10px' }}>Finalizando...</span>
+          </div>
+        )}
       </div>
 
       {/* Error Message */}
