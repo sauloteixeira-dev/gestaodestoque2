@@ -1,0 +1,10 @@
+name = "gestao-estoque-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Variáveis públicas (não sensíveis)
+
+# Secrets (configurar via: wrangler secret put SUPABASE_URL)
+# - SUPABASE_URL
+# - SUPABASE_SERVICE_KEY

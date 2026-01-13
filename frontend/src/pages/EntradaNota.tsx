@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { XMLParser } from 'fast-xml-parser';
 import { Upload, Check, FileText, PackagePlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { API_URL } from '../services/api';
+import { authenticatedFetch } from '../services/api';
 
 interface ProdutoNota {
     codigo: string;
@@ -80,11 +80,8 @@ const EntradaNota: React.FC = () => {
             // Vamos assumir que existe essa função no context ou chamar fetch direto aqui se preferir.
             // Por consistência, tentarei usar o Context se possível, mas como é uma feature nova, talvez seja melhor chamar fetch direto e depois recarregar o context.
 
-            const response = await fetch(`${API_URL}/api/entrada-estoque`, {
+            const response = await authenticatedFetch('/api/entrada-estoque', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify({ produtos })
             });
 

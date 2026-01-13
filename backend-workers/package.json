@@ -1,0 +1,16 @@
+{
+    "name": "gestao-estoque-workers",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "wrangler dev",
+        "deploy": "wrangler deploy"
+    },
+    "dependencies": {
+        "hono": "^4.0.0",
+        "@supabase/supabase-js": "^2.89.0"
+    },
+    "devDependencies": {
+        "wrangler": "^3.0.0"
+    }
+}

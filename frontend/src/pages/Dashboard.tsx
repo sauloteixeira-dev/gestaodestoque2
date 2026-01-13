@@ -11,7 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { Package, AlertTriangle, ShoppingCart, ArrowUpRight, PlusCircle, MinusCircle } from 'lucide-react';
-import { API_URL } from '../services/api';
+import { authenticatedFetch } from '../services/api';
 
 const Dashboard: React.FC = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
@@ -20,7 +20,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    fetch(`${API_URL}/entradas-estoque`)
+    authenticatedFetch('/entradas-estoque')
       .then(res => {
         if (!res.ok) throw new Error('Backend indisponível');
         return res.json();
