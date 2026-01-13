@@ -18,11 +18,13 @@ import {
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed: boolean;
+  toggleCollapse: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
   const { theme, toggleTheme } = useTheme();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Internal state removed: isCollapsed is now controlled by parent
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -49,76 +51,94 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <div className="logo-icon">
             <Box size={18} />
           </div>
-          {!isCollapsed && (
-            <div style={{ flex: 1, lineHeight: 1.2 }}>
-              <h2 style={{
-                fontSize: 'var(--text-md)',
-                fontWeight: 'var(--font-bold)',
-                letterSpacing: '-0.01em'
-              }}>
-                StockOS
-              </h2>
-              <span style={{
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-faint)'
-              }}>
-                Empresarial
-              </span>
-            </div>
-          )}
+          <div className="sidebar-logo-text" style={{ flex: 1, lineHeight: 1.2 }}>
+            <h2 style={{
+              fontSize: 'var(--text-md)',
+              fontWeight: 'var(--font-bold)',
+              letterSpacing: '-0.01em'
+            }}>
+              StockOS
+            </h2>
+            <span style={{
+              fontSize: 'var(--text-xs)',
+              color: 'var(--text-faint)'
+            }}>
+              Empresarial
+            </span>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--text-secondary)',
+              padding: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 'var(--radius-md)',
+              transition: 'all 0.2s ease'
+            }}
+            title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
+            className="theme-toggle-btn"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </div>
 
-      <nav style={{ flex: 1 }}>
-        <div className="sidebar-section">
-          {!isCollapsed && <div className="sidebar-label">Menu Principal</div>}
+        <nav style={{ flex: 1 }}>
+          <div className="sidebar-section">
+            <div className="sidebar-label">Menu Principal</div>
 
-          <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end onClick={onClose} title="Dashboard">
-            <LayoutDashboard size={18} />
-            {!isCollapsed && <span>Dashboard</span>}
-          </NavLink>
+            <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} end onClick={onClose} title="Dashboard">
+              <LayoutDashboard size={18} />
+              <span>Dashboard</span>
+            </NavLink>
 
-          <NavLink to="/cadastrar" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Novo Produto">
-            <PackagePlus size={18} />
-            {!isCollapsed && <span>Novo Produto</span>}
-          </NavLink>
+            <NavLink to="/cadastrar" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Novo Produto">
+              <PackagePlus size={18} />
+              <span>Novo Produto</span>
+            </NavLink>
 
-          <NavLink to="/saida" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Saída de Produtos">
-            <LogOut size={18} />
-            {!isCollapsed && <span>Saída de Produtos</span>}
-          </NavLink>
+            <NavLink to="/saida" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Saída de Produtos">
+              <LogOut size={18} />
+              <span>Saída de Produtos</span>
+            </NavLink>
 
-          <NavLink to="/historico-saidas" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Comprovante">
-            <History size={18} />
-            {!isCollapsed && <span>Comprovante</span>}
-          </NavLink>
-        </div>
+            <NavLink to="/historico-saidas" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Comprovante">
+              <History size={18} />
+              <span>Comprovante</span>
+            </NavLink>
+          </div>
 
-        <div className="sidebar-section">
-          {!isCollapsed && <div className="sidebar-label">Análises</div>}
+          <div className="sidebar-section">
+            <div className="sidebar-label">Análises</div>
 
-          <NavLink to="/estoque" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Controle de Estoque">
-            <Box size={18} />
-            {!isCollapsed && <span>Controle de Estoque</span>}
-          </NavLink>
+            <NavLink to="/estoque" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Controle de Estoque">
+              <Box size={18} />
+              <span>Controle de Estoque</span>
+            </NavLink>
 
-          <NavLink to="/relatorios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Relatórios">
-            <FileText size={18} />
-            {!isCollapsed && <span>Relatórios</span>}
-          </NavLink>
-        </div>
+            <NavLink to="/relatorios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Relatórios">
+              <FileText size={18} />
+              <span>Relatórios</span>
+            </NavLink>
+          </div>
 
-        <div className="sidebar-section">
-          {!isCollapsed && <div className="sidebar-label">Sistema</div>}
+          <div className="sidebar-section">
+            <div className="sidebar-label">Sistema</div>
 
-          <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Parâmetros">
-            <Settings size={18} />
-            {!isCollapsed && <span>Parâmetros</span>}
-          </NavLink>
-        </div>
-      </nav>
+            <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Parâmetros">
+              <Settings size={18} />
+              <span>Parâmetros</span>
+            </NavLink>
+          </div>
+        </nav>
 
-      {!isCollapsed && (
-        <div ref={userMenuRef} style={{ position: 'relative' }}>
+
+        <div ref={userMenuRef} className="user-profile-container" style={{ position: 'relative' }}>
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             className="user-profile"
@@ -133,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <div className="avatar">
               <img src="https://ui-avatars.com/api/?name=Admin+User&background=3b82f6&color=fff" alt="User" />
             </div>
-            <div style={{
+            <div className="user-profile-info" style={{
               display: 'flex',
               flexDirection: 'column',
               lineHeight: 1.3,
@@ -174,43 +194,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               overflow: 'hidden',
               zIndex: 1000
             }}>
-              <button
-                onClick={() => {
-                  toggleTheme();
-                  setIsUserMenuOpen(false);
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--space-3)',
-                  padding: 'var(--space-3)',
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-primary)',
-                  cursor: 'pointer',
-                  fontSize: 'var(--text-sm)',
-                  transition: 'background-color 0.15s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--hover-bg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                <span>{theme === 'dark' ? 'Tema Claro' : 'Tema Escuro'}</span>
-              </button>
+
             </div>
           )}
         </div>
-      )}
       </aside>
 
       {/* Collapse Button - Floating outside sidebar */}
       <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={toggleCollapse}
         className="sidebar-collapse-btn"
         style={{
           position: 'fixed',

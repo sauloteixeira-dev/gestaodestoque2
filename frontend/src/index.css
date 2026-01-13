@@ -243,8 +243,10 @@ body {
   transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.layout-container:has(.sidebar.collapsed) {
-  grid-template-columns: 80px 1fr;
+@media (min-width: 769px) {
+  .layout-container.collapsed {
+    grid-template-columns: 80px 1fr;
+  }
 }
 
 .content-area {
@@ -277,18 +279,22 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.sidebar.collapsed {
-  padding: var(--space-4);
-}
+@media (min-width: 769px) {
+  .sidebar.collapsed {
+    padding: var(--space-4);
+  }
 
-.sidebar.collapsed .nav-item {
-  justify-content: center;
-  padding: var(--space-3);
-}
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+    padding: var(--space-3);
+  }
 
-.sidebar.collapsed .sidebar-logo {
-  justify-content: center;
-  margin-bottom: var(--space-6);
+  .sidebar.collapsed .sidebar-logo {
+    justify-content: center;
+    margin-bottom: var(--space-6);
+    flex-direction: column;
+    gap: var(--space-4);
+  }
 }
 
 .sidebar-logo {
@@ -322,6 +328,25 @@ body {
   margin-bottom: var(--space-2);
   padding: 0 var(--space-3);
   text-transform: uppercase;
+}
+
+/* Hide sidebar text elements when collapsed (Desktop Only) */
+@media (min-width: 769px) {
+
+  .sidebar.collapsed .sidebar-logo-text,
+  .sidebar.collapsed .sidebar-label,
+  .sidebar.collapsed .nav-item span,
+  .sidebar.collapsed .theme-toggle-text,
+  .sidebar.collapsed .user-profile-info,
+  .sidebar.collapsed .user-profile {
+    display: none;
+  }
+
+  /* Show user profile icon only if we want? Actually current design hides the whole profile botton on collapsed? 
+     Let's check the TSX. The user profile is hidden entirely: {!isCollapsed && (...)}.
+     If we want to show just avatar when collapsed, we need to adjust. 
+     But for now, let's replicate existing behavior: generic hide.
+  */
 }
 
 .nav-item {
@@ -837,6 +862,8 @@ td.mono {
 
   .mobile-header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: var(--space-4);
   }
 
@@ -1061,4 +1088,3 @@ select option {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
 }
-

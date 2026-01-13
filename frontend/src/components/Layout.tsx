@@ -1,21 +1,30 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { Menu } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Menu, Sun, Moon } from 'lucide-react';
 
 const Layout: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => setIsSidebarOpen(false);
+  const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   return (
-    <div className="layout-container">
+    <div className={`layout-container ${isCollapsed ? 'collapsed' : ''}`}>
       {isSidebarOpen && (
         <div className="mobile-overlay" onClick={closeSidebar} />
       )}
 
-      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={closeSidebar}
+        isCollapsed={isCollapsed}
+        toggleCollapse={toggleCollapse}
+      />
 
       <main className="content-area">
         <div className="mobile-header">
@@ -27,6 +36,8 @@ const Layout: React.FC = () => {
             <Menu size={20} />
             <span>Menu</span>
           </button>
+
+
         </div>
 
         <Outlet />

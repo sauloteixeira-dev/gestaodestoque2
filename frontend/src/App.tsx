@@ -10,9 +10,11 @@ import Settings from './pages/Settings';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <>
+    <ThemeProvider>
       <ToastContainer
         position="bottom-right"
         autoClose={3000}
@@ -36,7 +38,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
-    </>
+    </ThemeProvider>
   );
 }
 
