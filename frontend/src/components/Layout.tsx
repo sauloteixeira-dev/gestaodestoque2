@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { useTheme } from '../context/ThemeContext';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 const Layout: React.FC = () => {
-  const { theme, toggleTheme } = useTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
