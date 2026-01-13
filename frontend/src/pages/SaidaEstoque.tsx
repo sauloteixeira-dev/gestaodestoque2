@@ -65,7 +65,7 @@ const SaidaEstoque: React.FC = () => {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
         gap: 'var(--space-4)',
         alignItems: 'start'
       }} className="responsive-grid-2">
@@ -93,11 +93,11 @@ const SaidaEstoque: React.FC = () => {
             <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'center', flexWrap: 'wrap' }}>
               <input
                 type="text"
-                placeholder="Digitar nome ou código do produto..."
+                placeholder="Digitar nome ou código..."
                 value={termoBusca}
                 onChange={(e) => setTermoBusca(e.target.value)}
                 className="input-field"
-                style={{ flex: 1, marginBottom: 0 }}
+                style={{ flex: 1, marginBottom: 0, minWidth: '150px' }}
               />
               <label style={{
                 display: 'flex',
@@ -116,7 +116,7 @@ const SaidaEstoque: React.FC = () => {
                   />
                   <span className="toggle-slider"></span>
                 </label>
-                Ocultar produtos sem estoque
+                Ocultar s/ estoque
               </label>
             </div>
           </div>
@@ -138,9 +138,11 @@ const SaidaEstoque: React.FC = () => {
               .map(produto => (
                 <div key={produto.id} style={{
                   display: 'flex',
+                  flexWrap: 'wrap',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: 'var(--space-4)',
+                  gap: 'var(--space-3)',
+                  padding: 'var(--space-3)',
                   background: 'var(--surface-raised)',
                   borderRadius: 'var(--radius-md)',
                   border: '1px solid var(--border-subtle)',

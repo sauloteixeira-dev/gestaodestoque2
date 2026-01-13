@@ -30,8 +30,8 @@ const Relatorios: React.FC = () => {
           id: `entrada-${entrada.id}`,
           tipo: 'ENTRADA' as MovimentacaoTipo,
           data: entrada.data_entrada,
-          produto_nome: entrada.produto_nome || 'Produto não informado',
-          produto_codigo: entrada.produto_codigo_barras || undefined,
+          produto_nome: entrada.produto?.nome || 'Produto não informado',
+          produto_codigo: entrada.produto?.codigo_barras || undefined,
           quantidade: entrada.quantidade,
           usuario: entrada.usuario_entrada || undefined
         }));
