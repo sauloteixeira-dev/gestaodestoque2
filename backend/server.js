@@ -12,7 +12,19 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-app.use(cors());
+// Configuração CORS para aceitar requisições do frontend
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://gestao-estoque-five.vercel.app',
+    /\.vercel\.app$/ // Aceita qualquer subdomínio da Vercel
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Middleware de Autenticação
