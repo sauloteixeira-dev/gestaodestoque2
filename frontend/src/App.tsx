@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import CadastroProduto from './pages/CadastroProduto';
@@ -7,37 +7,63 @@ import HistoricoSaidas from './pages/HistoricoSaidas';
 import ControleEstoque from './pages/ControleEstoque';
 import Relatorios from './pages/Relatorios';
 import Settings from './pages/Settings';
+import Login from './pages/Login';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Componente para rotas protegidas
+const PrivateRoute = ({ children }: { children: JSX.Element }) => {
+  const { session, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <div className="loading-screen">Carregando...</div>;
+  }
+
+  if (!session) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
 
 function App() {
   return (
     <ThemeProvider>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        aria-label="Notificações"
-      />
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="cadastrar" element={<CadastroProduto />} />
-          <Route path="saida" element={<SaidaEstoque />} />
-          <Route path="historico-saidas" element={<HistoricoSaidas />} />
-          <Route path="estoque" element={<ControleEstoque />} />
-          <Route path="relatorios" element={<Relatorios />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
+      <AuthProvider>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          aria-label="Notificações"
+        />
+        <Routes>
+          <Route path="/login" element={<Login />} />
+
+          <Route path="/" element={
+            <PrivateRoute>
+              <Layout />
+            </PrivateRoute>
+          }>
+            <Route index element={<Dashboard />} />
+            <Route path="cadastrar" element={<CadastroProduto />} />
+            <Route path="saida" element={<SaidaEstoque />} />
+            <Route path="historico-saidas" element={<HistoricoSaidas />} />
+            <Route path="estoque" element={<ControleEstoque />} />
+            <Route path="relatorios" element={<Relatorios />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
