@@ -49,6 +49,28 @@ app.post('/produtos', async (req, res) => {
 
     if (error) throw error;
 
+    // Busca o produto recém criado/atualizado para obter o ID
+    const { data: prod, error: errorBusca } = await supabase
+      .from('produtos')
+      .select('id, nome') // Select nome just for debug if needed
+      .eq('codigo_barras', codigo_barras)
+      .single();
+
+    if (errorBusca) {
+      console.error('Erro ao buscar produto para log:', errorBusca);
+      // Não falha a requisição principal, mas loga o erro
+    } else if (prod) {
+      // Registra o log de entrada
+      const { error: errorLog } = await supabase.from('entradas_estoque').insert({
+        produto_id: prod.id,
+        quantidade: quantidade,
+        motivo: 'Entrada Manual',
+        data_entrada: new Date().toISOString() // Ensure timestamp is sent
+      });
+
+      if (errorLog) console.error('Erro ao inserir log de entrada:', errorLog);
+    }
+
     res.status(201).json({ message: 'Operação de estoque realizada com sucesso!' });
   } catch (err) {
     console.error('Erro ao processar produto:', err);
@@ -72,11 +94,11 @@ app.post('/produtos/saida', async (req, res) => {
     });
 
     if (error) {
-        // Erros customizados da função podem ser tratados aqui
-        if (error.message.includes('Produto não encontrado') || error.message.includes('Estoque insuficiente')) {
-            return res.status(400).json({ error: error.message });
-        }
-        throw error;
+      // Erros customizados da função podem ser tratados aqui
+      if (error.message.includes('Produto não encontrado') || error.message.includes('Estoque insuficiente')) {
+        return res.status(400).json({ error: error.message });
+      }
+      throw error;
     }
 
     res.status(200).json({ message: 'Baixa no estoque realizada com sucesso!' });
@@ -272,6 +294,120 @@ app.get('/logs-exclusao', async (req, res) => {
     console.error('Erro ao buscar logs de exclusão:', err);
     res.status(500).json({ error: err.message });
   }
+});
+
+// Rota para entrada de estoque via Nota Fiscal (Lote)
+app.post('/api/entrada-estoque', async (req, res) => {
+  const { produtos } = req.body;
+
+  if (!produtos || !Array.isArray(produtos) || produtos.length === 0) {
+    return res.status(400).json({ error: 'Lista de produtos inválida.' });
+  }
+
+  try {
+    const resultados = [];
+    const erros = [];
+
+    for (const item of produtos) {
+      // Tenta encontrar produto pelo nome (match exato por enquanto)
+      const { data: produtoExistente, error: errorBusca } = await supabase
+        .from('produtos')
+        .select('*')
+        .eq('nome', item.nome)
+        .maybeSingle(); // maybeSingle não lança erro se não encontrar
+
+      if (errorBusca) {
+        erros.push({ item: item.nome, error: errorBusca.message });
+        continue;
+      }
+
+      if (produtoExistente) {
+        // Atualiza quantidade
+        const novaQuantidade = (produtoExistente.quantidade || 0) + item.quantidade;
+        const { error: errorUpdate } = await supabase
+          .from('produtos')
+          .update({ quantidade: novaQuantidade })
+          .eq('id', produtoExistente.id);
+
+        if (errorUpdate) {
+          erros.push({ item: item.nome, error: errorUpdate.message });
+        } else {
+          resultados.push({ item: item.nome, status: 'atualizado', nova_quantidade: novaQuantidade });
+
+          // Log de Entrada para Produto Existente
+          await supabase.from('entradas_estoque').insert({
+            produto_id: produtoExistente.id,
+            quantidade: item.quantidade,
+            motivo: 'Importação NFe'
+          });
+        }
+      } else {
+        // Cria novo produto
+        // Assumimos valores padrão para campos obrigatórios se houver
+        const { error: errorInsert } = await supabase
+          .from('produtos')
+          .insert([{
+            nome: item.nome,
+            quantidade: item.quantidade,
+            codigo_barras: item.codigo, // Usando cProd como código de barras
+            // Outros campos podem ficar null ou default
+          }]);
+
+        if (errorInsert) {
+          erros.push({ item: item.nome, error: errorInsert.message });
+        } else {
+          resultados.push({ item: item.nome, status: 'criado', quantidade: item.quantidade });
+
+          // Log de Entrada para Novo Produto
+          if (data && data[0]) {
+            await supabase.from('entradas_estoque').insert({
+              produto_id: data[0].id,
+              quantidade: item.quantidade,
+              motivo: 'Importação NFe'
+            });
+          }
+        }
+      }
+    }
+
+    if (erros.length > 0 && resultados.length === 0) {
+      return res.status(500).json({ error: 'Falha ao processar todos os itens.', detalhes: erros });
+    }
+
+    res.status(200).json({
+      message: 'Processamento concluído.',
+      resultados,
+      erros_parciais: erros.length > 0 ? erros : undefined
+    });
+
+  } catch (err) {
+    console.error('Erro ao processar entrada de estoque:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Rota para buscar histórico de entradas
+app.get('/entradas-estoque', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('entradas_estoque')
+      .select(`
+        *,
+        produto:produtos(nome, codigo_barras)
+      `)
+      .order('data_entrada', { ascending: false });
+
+    if (error) throw error;
+    res.status(200).json(data);
+  } catch (err) {
+    console.error('Erro ao buscar entradas:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/debug-entradas', async (req, res) => {
+  const { data, error } = await supabase.from('entradas_estoque').select('*');
+  res.json({ data, error });
 });
 
 // Inicia o servidor

@@ -1,141 +1,116 @@
-# 📦 Sistema de Gestão de Estoque
+# 📦 Sistema de Gestão de Estoque - StockOS
 
-Sistema completo de gestão de estoque com autenticação e controle de acesso baseado em roles (Admin/Usuário).
+Sistema moderno e eficiente para gestão de estoque, desenvolvido para atender demandas de controle de entrada, saída e monitoramento de produtos.
 
 ## 🚀 Tecnologias
 
 ### Frontend
 - **React** + **TypeScript**
-- **Vite** - Build tool
-- **React Router** - Navegação
-- **Supabase Client** - Autenticação e banco de dados
-- **CSS Modules** - Estilização
+- **Vite** - Build tool ultra-rápida.
+- **Recharts** - Gráficos interativos para o Dashboard.
+- **Lucide React** - Ícones modernos e leves.
+- **React Router** - Navegação SPA.
+- **CSS3** - Design sistema com suporte a **Modo Escuro** e **Claro**.
 
 ### Backend
-- **Supabase** - Backend as a Service
-  - PostgreSQL Database
-  - Authentication
-  - Row Level Security (RLS)
-  - Real-time subscriptions
+- **Node.js** + **Express** - Servidor leve e performático.
+- **SQLite** - Banco de dados local, simples e sem configurações complexas.
+- **Multer** - Upload de arquivos (para importação de XML).
 
 ## ✨ Funcionalidades
 
-### 🔐 Autenticação
-- Login/Logout com email e senha
-- Controle de acesso baseado em roles (Admin/Usuário)
-- Proteção de rotas
-- Gerenciamento de sessão
+### 🏠 Dashboard
+- **Visão Geral:** Cards com total de produtos, movimentações, itens críticos e sem estoque.
+- **Gráfico:** Análise visual de entradas e saídas nos últimos 30 dias.
+- **Atalhos Rápidos:** Botões de ação para operações frequentes.
+- **Responsivo:** Layout adaptável para mobile e desktop.
 
-### 👤 Usuário Comum
-- ✅ Dashboard
-- ✅ Cadastrar Produto
-- ✅ Saída de Estoque
-- ✅ Histórico de Saídas
+### 📦 Controle de Estoque
+- **Cadastro de Produtos:** Interface intuitiva para adicionar novos itens.
+- **Editar Estoque:** Ajuste rápido de quantidades e detalhes.
+- **Importação de NFe (XML):** Entrada massiva de produtos lendo o XML da Nota Fiscal Eletrônica.
 
-### 👑 Administrador
-- ✅ Todas as funcionalidades do usuário comum
-- ✅ Gerenciar Estoque (entrada/saída/exclusão)
-- ✅ Logs de Exclusão
+### 🔄 Movimentações
+- **Entrada Manual:** Registro detalhado de recebimento de materiais.
+- **Saída de Estoque:** Baixa de produtos com vínculo a um local/setor e responsável.
+- **Histórico Completo:** Rastreabilidade total de quem retirou, quando e para onde.
+
+### 📊 Relatórios e Monitoramento
+- **Estoque Baixo/Crítico:** Listas filtradas para reposição urgente.
+- **Impressão Profissional:** Layouts de impressão otimizados para relatórios físicos.
+- **Busca Global:** Pesquisa rápida por nome, código de barras ou local.
+
+### ⚙️ Configurações
+- **Temas:** Suporte nativo a Tema Escuro (Dark Mode) e Claro.
+- **Gestão de Locais:** Cadastro de setores de destino para as saídas.
 
 ## 📋 Pré-requisitos
 
-- Node.js 18+ 
-- npm ou yarn
-- Conta no Supabase
+- **Node.js** 18 ou superior.
+- **NPM** (gerenciador de pacotes).
 
-## 🔧 Instalação
+## 🔧 Instalação e Execução
 
-### 1. Clone o repositório
+### 1. Backend (Servidor)
+
+O backend roda na porta `3001` e gerencia o banco de dados SQLite.
+
 ```bash
-git clone https://github.com/seu-usuario/sistema-estoque.git
-cd sistema-estoque
+cd backend
+npm install
+node server.js
 ```
 
-### 2. Instale as dependências do frontend
+### 2. Frontend (Aplicação Web)
+
+O frontend roda na porta `5173` (padrão Vite).
+
 ```bash
+# Abra um novo terminal
 cd frontend
 npm install
-```
-
-### 3. Configure as variáveis de ambiente
-
-Crie um arquivo `.env` na pasta `frontend`:
-
-```env
-VITE_SUPABASE_URL=sua_url_do_supabase
-VITE_SUPABASE_ANON_KEY=sua_chave_anonima
-```
-
-### 4. Configure o Supabase
-
-Execute as migrations SQL no Supabase SQL Editor (disponíveis na documentação).
-
-## 🚀 Executando o projeto
-
-### Frontend
-```bash
-cd frontend
 npm run dev
 ```
 
-O frontend estará disponível em: `http://localhost:5173`
-
-## 👥 Usuários de Teste
-
-### Admin
-- Email: sauloadolfo32@gmail.com
-- Senha: Saulo728568
-
-### Usuário Comum
-- Email: chain@user.com
-- Senha: chain060126
+Acesse a aplicação em: `http://localhost:5173`
 
 ## 📁 Estrutura do Projeto
 
 ```
-projeto/
-├── frontend/
+gestao-estoque/
+├── backend/            # API e Banco de Dados
+│   ├── database.db     # Arquivo do SQLite (criado automaticamente)
+│   ├── server.js       # Lógica do servidor Express
+│   └── package.json    # Dependências do backend
+│
+├── frontend/           # Aplicação React
 │   ├── src/
-│   │   ├── components/     # Componentes reutilizáveis
-│   │   ├── context/        # Context API (Auth, Produto, Saida)
-│   │   ├── pages/          # Páginas da aplicação
-│   │   ├── App.tsx         # Componente principal
-│   │   └── main.tsx        # Entry point
-│   ├── .env                # Variáveis de ambiente (não commitado)
-│   └── package.json
-├── .gitignore
-├── README.md
-└── AUTENTICACAO.md         # Documentação detalhada de autenticação
+│   │   ├── components/ # Componentes (Sidebar, Cards, etc)
+│   │   ├── context/    # Gestão de Estado (Auth, Produtos, Tema)
+│   │   ├── pages/      # Telas (Dashboard, Estoque, etc)
+│   │   └── styles/     # Arquivos CSS globais
+│   └── package.json    # Dependências do frontend
+│
+└── README.md           # Documentação
 ```
 
-## 🔒 Segurança
+## 🔒 Banco de Dados
 
-- Autenticação via Supabase Auth
-- Row Level Security (RLS) no banco de dados
-- Proteção de rotas no frontend
-- Validação de permissões por role
-- Limpeza automática de cache ao logout
-
-## 📚 Documentação Adicional
-
-- `AUTENTICACAO.md` - Guia completo de autenticação e permissões
+O banco de dados é inicializado automaticamente no arquivo `backend/database.db` na primeira execução do servidor. Tabelas incluídas:
+- `produtos`
+- `saidas` (com relacionamento para itens)
+- `entradas`
+- `locais` (setores)
+- `logs_exclusao`
 
 ## 🤝 Contribuindo
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT.
+1. Faça um Fork do projeto.
+2. Crie uma branch para sua feature (`git checkout -b feature/NovaFeature`).
+3. Commit suas mudanças (`git commit -m 'Adiciona NovaFeature'`).
+4. Push para a branch (`git push origin feature/NovaFeature`).
+5. Abra um Pull Request.
 
 ## 👨‍💻 Autor
 
-Desenvolvido por Saulo Adolfo
-
----
-
-**⚠️ IMPORTANTE:** Nunca commite o arquivo `.env` com suas credenciais do Supabase!
+Desenvolvido por **Saulo Adolfo**.

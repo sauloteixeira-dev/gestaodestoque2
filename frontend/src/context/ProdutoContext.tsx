@@ -44,11 +44,23 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const adicionarProduto = async (codigoBarras: string, nome: string, quantidade: number) => {
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('produtos')
-        .insert({ codigo_barras: codigoBarras, nome, quantidade });
+        .insert({ codigo_barras: codigoBarras, nome, quantidade })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Registrar Entrada
+      if (data) {
+        await supabase.from('entradas_estoque').insert({
+          produto_id: data.id,
+          quantidade: quantidade,
+          motivo: 'Entrada Inicial',
+          data_entrada: new Date().toISOString()
+        });
+      }
 
       await fetchProdutos();
       toast.success('Produto adicionado com sucesso!');
@@ -97,6 +109,14 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
         .eq('id', produto.id);
 
       if (error) throw error;
+
+      // Registrar Entrada
+      await supabase.from('entradas_estoque').insert({
+        produto_id: produto.id,
+        quantidade: quantidadeEntrada,
+        motivo: 'Entrada Manual (Atualização)',
+        data_entrada: new Date().toISOString()
+      });
 
       // Atualizar localmente para melhor UX
       setProdutos(prev => prev.map(p =>
