@@ -7,18 +7,24 @@ import { Search } from 'lucide-react';
 const ITEMS_PER_PAGE = 10;
 
 const HistoricoSaidas: React.FC = () => {
-  const { saidas, loading } = useSaida();
+  const { saidas, loading, locais } = useSaida();
   const [saidaSelecionada, setSaidaSelecionada] = useState<SaidaEstoque | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [termoBusca, setTermoBusca] = useState('');
   const [dataFiltro, setDataFiltro] = useState('');
+  const [saidaExpandida, setSaidaExpandida] = useState<number | null>(null);
+
+  const formatName = (name: string) => {
+    if (!name) return name;
+    return name.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+  };
 
   const filteredSaidas = useMemo(() => {
     let filtered = saidas;
 
     // Aplicar filtro de texto
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (termoBusca) {
+      const term = termoBusca.toLowerCase();
       filtered = filtered.filter(saida =>
         saida.local?.nome.toLowerCase().includes(term) ||
         saida.usuario_retirada.toLowerCase().includes(term)
@@ -36,7 +42,7 @@ const HistoricoSaidas: React.FC = () => {
     }
 
     return filtered;
-  }, [saidas, searchTerm, dataFiltro]);
+  }, [saidas, termoBusca, dataFiltro]);
 
   const paginatedSaidas = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -95,9 +101,9 @@ const HistoricoSaidas: React.FC = () => {
                 <input
                   type="text"
                   placeholder="Buscar por local ou responsável..."
-                  value={searchTerm}
+                  value={termoBusca}
                   onChange={(e) => {
-                    setSearchTerm(e.target.value);
+                    setTermoBusca(e.target.value);
                     setCurrentPage(1);
                   }}
                   className="input-field"
@@ -120,50 +126,50 @@ const HistoricoSaidas: React.FC = () => {
             </div>
             <div className="table-responsive">
               <table>
-              <thead>
-                <tr>
-                  <th>Data/Hora</th>
-                  <th>Local</th>
-                  <th>Responsável</th>
-                  <th style={{ textAlign: 'center' }}>Itens</th>
-                  <th style={{ textAlign: 'right' }}>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedSaidas.map(saida => (
-                  <tr key={saida.id}>
-                    <td className="mono">{formatarData(saida.data_saida)}</td>
-                    <td>{saida.local?.nome || 'Local não informado'}</td>
-                    <td>{saida.usuario_retirada}</td>
-                    <td style={{ textAlign: 'center' }}>
-                      <span className="mono" style={{
-                        fontWeight: 'var(--font-semibold)',
-                        color: 'var(--text-primary)'
-                      }}>
-                        {saida.itens?.length || 0}
-                      </span>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        onClick={() => gerarDocumento(saida)}
-                        className="btn-secondary"
-                        style={{
-                          padding: 'var(--space-2) var(--space-3)',
-                          fontSize: 'var(--text-sm)'
-                        }}
-                      >
-                        📄 Ver Comprovante
-                      </button>
-                    </td>
+                <thead>
+                  <tr>
+                    <th>Data/Hora</th>
+                    <th>Local</th>
+                    <th>Responsável</th>
+                    <th style={{ textAlign: 'center' }}>Itens</th>
+                    <th style={{ textAlign: 'right' }}>Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+                </thead>
+                <tbody>
+                  {paginatedSaidas.map(saida => (
+                    <tr key={saida.id}>
+                      <td className="mono">{formatarData(saida.data_saida)}</td>
+                      <td>{saida.local?.nome || 'Local não informado'}</td>
+                      <td>{formatName(saida.usuario_retirada)}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span className="mono" style={{
+                          fontWeight: 'var(--font-semibold)',
+                          color: 'var(--text-primary)'
+                        }}>
+                          {saida.itens?.length || 0}
+                        </span>
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <button
+                          onClick={() => gerarDocumento(saida)}
+                          className="btn-secondary"
+                          style={{
+                            padding: 'var(--space-2) var(--space-3)',
+                            fontSize: 'var(--text-sm)'
+                          }}
+                        >
+                          📄 Ver Comprovante
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
           </>
         ) : (
@@ -244,7 +250,7 @@ const HistoricoSaidas: React.FC = () => {
                         <span style={{ color: '#000' }}><strong>Local:</strong> {saidaSelecionada.local?.nome}</span>
                       </div>
                       <div className="info-row" style={{ marginBottom: '8px' }}>
-                        <span style={{ color: '#000' }}><strong>Nome do Responsável:</strong> {saidaSelecionada.usuario_retirada}</span>
+                        <span style={{ color: '#000' }}><strong>Nome do Responsável:</strong> {formatName(saidaSelecionada.usuario_retirada)}</span>
                       </div>
                       <div className="info-row" style={{ marginBottom: '8px' }}>
                         <span style={{ color: '#000' }}><strong>Data:</strong> {formatarData(saidaSelecionada.data_saida)}</span>

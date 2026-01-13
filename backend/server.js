@@ -15,6 +15,31 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 app.use(cors());
 app.use(bodyParser.json());
 
+// Middleware de Autenticação
+const authenticateUser = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Token de autenticação não fornecido.' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({ error: 'Token inválido ou expirado.' });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error('Erro na autenticação:', err);
+    return res.status(500).json({ error: 'Erro interno na validação do token.' });
+  }
+};
+
 // Rota para buscar todos os produtos
 app.get('/produtos', async (req, res) => {
   try {
@@ -31,9 +56,10 @@ app.get('/produtos', async (req, res) => {
   }
 });
 
-// Rota para adicionar um produto ou atualizar a quantidade
-app.post('/produtos', async (req, res) => {
+// Rota para adicionar um produto ou atualizar a quantidade (Protegida)
+app.post('/produtos', authenticateUser, async (req, res) => {
   const { codigo_barras, nome, quantidade } = req.body;
+  const userId = req.user.id; // ID do usuário autenticado
 
   if (!codigo_barras || !nome || quantidade == null || quantidade <= 0) {
     return res.status(400).json({ error: 'Todos os campos são obrigatórios e a quantidade deve ser positiva.' });
@@ -52,20 +78,20 @@ app.post('/produtos', async (req, res) => {
     // Busca o produto recém criado/atualizado para obter o ID
     const { data: prod, error: errorBusca } = await supabase
       .from('produtos')
-      .select('id, nome') // Select nome just for debug if needed
+      .select('id, nome')
       .eq('codigo_barras', codigo_barras)
       .single();
 
     if (errorBusca) {
       console.error('Erro ao buscar produto para log:', errorBusca);
-      // Não falha a requisição principal, mas loga o erro
     } else if (prod) {
-      // Registra o log de entrada
+      // Registra o log de entrada com user_id
       const { error: errorLog } = await supabase.from('entradas_estoque').insert({
         produto_id: prod.id,
         quantidade: quantidade,
         motivo: 'Entrada Manual',
-        data_entrada: new Date().toISOString() // Ensure timestamp is sent
+        data_entrada: new Date().toISOString(),
+        user_id: userId
       });
 
       if (errorLog) console.error('Erro ao inserir log de entrada:', errorLog);
@@ -78,8 +104,8 @@ app.post('/produtos', async (req, res) => {
   }
 });
 
-// Rota para dar baixa no estoque
-app.post('/produtos/saida', async (req, res) => {
+// Rota para dar baixa no estoque (Protegida)
+app.post('/produtos/saida', authenticateUser, async (req, res) => {
   const { produto_id, quantidade } = req.body;
 
   if (produto_id == null || quantidade == null || quantidade <= 0) {
@@ -87,14 +113,12 @@ app.post('/produtos/saida', async (req, res) => {
   }
 
   try {
-    // Usando uma função RPC para encapsular a lógica da transação no Supabase
     const { error } = await supabase.rpc('dar_baixa_estoque', {
       p_produto_id: produto_id,
       p_quantidade: quantidade
     });
 
     if (error) {
-      // Erros customizados da função podem ser tratados aqui
       if (error.message.includes('Produto não encontrado') || error.message.includes('Estoque insuficiente')) {
         return res.status(400).json({ error: error.message });
       }
@@ -108,12 +132,12 @@ app.post('/produtos/saida', async (req, res) => {
   }
 });
 
-// Rota para excluir um produto
-app.delete('/produtos/:id', async (req, res) => {
+// Rota para excluir um produto (Protegida)
+app.delete('/produtos/:id', authenticateUser, async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
 
   try {
-    // Primeiro, buscar os dados do produto antes de excluí-lo para o log
     const { data: produto, error: errorBusca } = await supabase
       .from('produtos')
       .select('*')
@@ -127,7 +151,6 @@ app.delete('/produtos/:id', async (req, res) => {
       throw errorBusca;
     }
 
-    // Excluir o produto
     const { error: errorExclusao } = await supabase
       .from('produtos')
       .delete()
@@ -135,7 +158,7 @@ app.delete('/produtos/:id', async (req, res) => {
 
     if (errorExclusao) throw errorExclusao;
 
-    // Inserir o log da exclusão
+    // Inserir o log da exclusão com user_id
     const { error: errorLog } = await supabase
       .from('logs_exclusao')
       .insert({
@@ -143,12 +166,12 @@ app.delete('/produtos/:id', async (req, res) => {
         produto_nome: produto.nome,
         produto_codigo_barras: produto.codigo_barras,
         produto_quantidade: produto.quantidade,
-        usuario_exclusao: 'sistema' // Pode ser alterado para auth.uid() se tiver autenticação
+        usuario_exclusao: 'sistema',
+        user_id: userId
       });
 
     if (errorLog) {
       console.error('Erro ao registrar log de exclusão:', errorLog);
-      // Não falha a exclusão, mas registra o erro no console
     }
 
     res.status(200).json({ message: 'Produto excluído com sucesso!' });
@@ -174,8 +197,8 @@ app.get('/locais-saida', async (req, res) => {
   }
 });
 
-// Rota para adicionar um novo local de saída
-app.post('/locais-saida', async (req, res) => {
+// Rota para adicionar um novo local de saída (Protegida)
+app.post('/locais-saida', authenticateUser, async (req, res) => {
   const { nome, descricao } = req.body;
 
   if (!nome) {
@@ -196,9 +219,10 @@ app.post('/locais-saida', async (req, res) => {
   }
 });
 
-// Rota para registrar uma saída de estoque
-app.post('/saidas-estoque', async (req, res) => {
+// Rota para registrar uma saída de estoque (Protegida)
+app.post('/saidas-estoque', authenticateUser, async (req, res) => {
   const { local_id, usuario_retirada, itens, observacoes } = req.body;
+  const userId = req.user.id;
 
   if (!local_id || !usuario_retirada || !itens || itens.length === 0) {
     return res.status(400).json({ error: 'Dados incompletos para registrar saída.' });
@@ -208,7 +232,7 @@ app.post('/saidas-estoque', async (req, res) => {
     // Iniciar a transação
     const { data: saida, error: errorSaida } = await supabase
       .from('saidas_estoque')
-      .insert([{ local_id, usuario_retirada, observacoes }])
+      .insert([{ local_id, usuario_retirada, observacoes, user_id: userId }])
       .select()
       .single();
 
@@ -299,6 +323,7 @@ app.get('/logs-exclusao', async (req, res) => {
 // Rota para entrada de estoque via Nota Fiscal (Lote)
 app.post('/api/entrada-estoque', async (req, res) => {
   const { produtos } = req.body;
+  // user_id removed as auth is not required for this route yet
 
   if (!produtos || !Array.isArray(produtos) || produtos.length === 0) {
     return res.status(400).json({ error: 'Lista de produtos inválida.' });
@@ -314,7 +339,7 @@ app.post('/api/entrada-estoque', async (req, res) => {
         .from('produtos')
         .select('*')
         .eq('nome', item.nome)
-        .maybeSingle(); // maybeSingle não lança erro se não encontrar
+        .maybeSingle();
 
       if (errorBusca) {
         erros.push({ item: item.nome, error: errorBusca.message });
@@ -339,19 +364,20 @@ app.post('/api/entrada-estoque', async (req, res) => {
             produto_id: produtoExistente.id,
             quantidade: item.quantidade,
             motivo: 'Importação NFe'
+            // user_id removed
           });
         }
       } else {
         // Cria novo produto
-        // Assumimos valores padrão para campos obrigatórios se houver
-        const { error: errorInsert } = await supabase
+        const { data: novoProdutoData, error: errorInsert } = await supabase
           .from('produtos')
           .insert([{
             nome: item.nome,
             quantidade: item.quantidade,
-            codigo_barras: item.codigo, // Usando cProd como código de barras
-            // Outros campos podem ficar null ou default
-          }]);
+            codigo_barras: item.codigo,
+          }])
+          .select()
+          .single();
 
         if (errorInsert) {
           erros.push({ item: item.nome, error: errorInsert.message });
@@ -359,11 +385,12 @@ app.post('/api/entrada-estoque', async (req, res) => {
           resultados.push({ item: item.nome, status: 'criado', quantidade: item.quantidade });
 
           // Log de Entrada para Novo Produto
-          if (data && data[0]) {
+          if (novoProdutoData) {
             await supabase.from('entradas_estoque').insert({
-              produto_id: data[0].id,
+              produto_id: novoProdutoData.id,
               quantidade: item.quantidade,
               motivo: 'Importação NFe'
+              // user_id removed
             });
           }
         }
@@ -389,7 +416,7 @@ app.post('/api/entrada-estoque', async (req, res) => {
 // Rota para buscar histórico de entradas
 app.get('/entradas-estoque', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data: entradas, error } = await supabase
       .from('entradas_estoque')
       .select(`
         *,
@@ -398,7 +425,33 @@ app.get('/entradas-estoque', async (req, res) => {
       .order('data_entrada', { ascending: false });
 
     if (error) throw error;
-    res.status(200).json(data);
+
+    // Buscar perfis dos usuários para obter nicknames
+    const userIds = [...new Set(entradas.map(e => e.user_id).filter(Boolean))];
+
+    let profilesMap = new Map();
+    if (userIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, nickname, email')
+        .in('id', userIds);
+
+      if (!profilesError && profiles) {
+        profilesMap = new Map(profiles.map(p => [p.id, p]));
+      }
+    }
+
+    // Enriquecer os dados com o nome do usuário/nickname
+    const entradasEnriquecidas = entradas.map(entrada => {
+      const profile = profilesMap.get(entrada.user_id);
+      const nomeUsuario = profile ? (profile.nickname || profile.email) : 'Usuário desconhecido';
+      return {
+        ...entrada,
+        usuario_entrada: nomeUsuario // Sobrescreve/define com o nome legível
+      };
+    });
+
+    res.status(200).json(entradasEnriquecidas);
   } catch (err) {
     console.error('Erro ao buscar entradas:', err);
     res.status(500).json({ error: err.message });
@@ -415,4 +468,3 @@ app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}.`);
   console.log('Conectado ao Supabase.');
 });
-
