@@ -7,12 +7,12 @@ import { Search } from 'lucide-react';
 const ITEMS_PER_PAGE = 10;
 
 const HistoricoSaidas: React.FC = () => {
-  const { saidas, loading, locais } = useSaida();
+  const { saidas, loading } = useSaida();
   const [saidaSelecionada, setSaidaSelecionada] = useState<SaidaEstoque | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [termoBusca, setTermoBusca] = useState('');
   const [dataFiltro, setDataFiltro] = useState('');
-  const [saidaExpandida, setSaidaExpandida] = useState<number | null>(null);
+
 
   const formatName = (name: string) => {
     if (!name) return name;

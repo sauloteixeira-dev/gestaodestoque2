@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, ShieldAlert, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 interface LogEntrada {
