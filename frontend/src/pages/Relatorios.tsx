@@ -14,6 +14,8 @@ interface Movimentacao {
   usuario?: string;
 }
 
+import { API_URL } from '../services/api';
+
 const Relatorios: React.FC = () => {
   const { saidas } = useSaida();
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
@@ -22,7 +24,7 @@ const Relatorios: React.FC = () => {
   useEffect(() => {
     const fetchEntradas = async () => {
       try {
-        const response = await fetch('http://localhost:3001/entradas-estoque');
+        const response = await fetch(`${API_URL}/entradas-estoque`);
         if (!response.ok) throw new Error('Backend indisponível');
         const entradas = await response.json();
 

@@ -2,8 +2,16 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  AreaChart, Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
 import { Package, AlertTriangle, ShoppingCart, ArrowUpRight, PlusCircle, MinusCircle } from 'lucide-react';
+import { API_URL } from '../services/api';
 
 const Dashboard: React.FC = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
@@ -12,7 +20,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    fetch('http://localhost:3001/entradas-estoque')
+    fetch(`${API_URL}/entradas-estoque`)
       .then(res => {
         if (!res.ok) throw new Error('Backend indisponível');
         return res.json();
@@ -81,7 +89,7 @@ const Dashboard: React.FC = () => {
   const outOfStock = produtos.filter(p => p.quantidade === 0).length;
 
   return (
-    <div>
+    <div style={{ minWidth: '0' }}>
       <div className="page-header">
         <h1 className="page-title">Visão Geral</h1>
         <p className="page-subtitle">Acompanhe métricas e movimentações do estoque em tempo real</p>
@@ -450,69 +458,70 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div style={{ flex: 1, minHeight: 0 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis
-                dataKey="name"
-                stroke="var(--text-faint)"
-                fontSize={11}
-                tickLine={false}
-                axisLine={{ stroke: 'var(--border)', strokeWidth: 1 }}
-              />
-              <YAxis
-                stroke="var(--text-faint)"
-                fontSize={11}
-                tickLine={false}
-                axisLine={{ stroke: 'var(--border)', strokeWidth: 1 }}
-              />
-              <CartesianGrid
-                strokeDasharray="3 3"
-                vertical={false}
-                stroke="var(--border-subtle)"
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'var(--bg-elevated)',
-                  borderColor: 'var(--border)',
-                  borderRadius: 'var(--radius-md)',
-                  color: 'var(--text-primary)',
-                  fontSize: 'var(--text-sm)',
-                  padding: 'var(--space-2) var(--space-3)'
-                }}
-                itemStyle={{ color: 'var(--text-primary)' }}
-              />
-              <Area
-                type="monotone"
-                dataKey="entrada"
-                name="Entrada (Qtd)"
-                stroke="#10b981"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorIn)"
-              />
-              <Area
-                type="monotone"
-                dataKey="saida"
-                name="Saída (Qtd)"
-                stroke="#8b5cf6"
-                strokeWidth={2}
-                fillOpacity={1}
-                fill="url(#colorOut)"
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div style={{ flex: 1, minHeight: 0, position: 'relative', width: '100%' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height="100%" debounce={50}>
+              <AreaChart data={chartData}>
+                <defs>
+                  <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+
+                <XAxis
+                  dataKey="nome"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                  dy={10}
+                />
+
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                />
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--bg-primary)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+
+                <Area
+                  type="monotone"
+                  dataKey="entradas"
+                  name="Entradas"
+                  stroke="#10B981"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorEntradas)"
+                />
+
+                <Area
+                  type="monotone"
+                  dataKey="saidas"
+                  name="Saídas"
+                  stroke="#EF4444"
+                  strokeWidth={2}
+                  fillOpacity={1}
+                  fill="url(#colorSaidas)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+
       </div>
     </div>
   );

@@ -17,19 +17,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const root = document.documentElement;
-    console.log('Theme changed to:', theme); // Debug log
     if (theme === 'dark') {
       root.classList.add('dark');
-      console.log('Added dark class. Classes:', root.classList.toString());
     } else {
       root.classList.remove('dark');
-      console.log('Removed dark class. Classes:', root.classList.toString());
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    console.log('Toggling theme...'); // Debug log
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
   };
 

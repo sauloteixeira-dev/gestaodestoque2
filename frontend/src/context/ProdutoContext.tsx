@@ -54,12 +54,17 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       // Registrar Entrada
       if (data) {
-        await supabase.from('entradas_estoque').insert({
+        const { data: { session } } = await supabase.auth.getSession();
+
+        const { error: errorLog } = await supabase.from('entradas_estoque').insert({
           produto_id: data.id,
           quantidade: quantidade,
           motivo: 'Entrada Inicial',
-          data_entrada: new Date().toISOString()
+          data_entrada: new Date().toISOString(),
+          user_id: session?.user?.id
         });
+
+        if (errorLog) console.error('Erro ao inserir log:', errorLog);
       }
 
       await fetchProdutos();
@@ -74,6 +79,10 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const darBaixaEstoque = async (produtoId: number, quantidadeBaixa: number) => {
     try {
+      // Nota: Baixa de estoque simplificada geralmente não registra log de saída complexo aqui,
+      // mas se registrar, deve usar user_id também. 
+      // Por enquanto, mantemos o update simples, mas vamos garantir que se houver log futuro, tenha user_id.
+
       const { error } = await supabase
         .from('produtos')
         .update({ quantidade: quantidadeBaixa })
@@ -110,13 +119,18 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       if (error) throw error;
 
+      const { data: { session } } = await supabase.auth.getSession();
+
       // Registrar Entrada
-      await supabase.from('entradas_estoque').insert({
+      const { error: errorLog } = await supabase.from('entradas_estoque').insert({
         produto_id: produto.id,
         quantidade: quantidadeEntrada,
         motivo: 'Entrada Manual (Atualização)',
-        data_entrada: new Date().toISOString()
+        data_entrada: new Date().toISOString(),
+        user_id: session?.user?.id
       });
+
+      if (errorLog) console.error('Erro ao inserir log de entrada (update):', errorLog);
 
       // Atualizar localmente para melhor UX
       setProdutos(prev => prev.map(p =>

@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
+import { useAuth } from '../context/AuthContext';
 import { Package, Minus, Plus, LogOut } from 'lucide-react';
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();
   const { locais, registrarSaida } = useSaida();
+  const { profile } = useAuth();
+
   const [localSelecionado, setLocalSelecionado] = useState<number | null>(null);
   const [usuario, setUsuario] = useState('');
   const [observacoes, setObservacoes] = useState('');
   const [itensSelecionados, setItensSelecionados] = useState<{ [key: number]: number }>({});
   const [termoBusca, setTermoBusca] = useState('');
   const [ocultarSemEstoque, setOcultarSemEstoque] = useState(false);
+
+  React.useEffect(() => {
+    if (profile?.nickname) {
+      const formattedName = profile.nickname.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+      setUsuario(formattedName);
+    }
+  }, [profile]);
 
   const capitalizarPrimeiraLetra = (texto: string): string => {
     if (!texto) return texto;
@@ -316,6 +326,8 @@ const SaidaEstoque: React.FC = () => {
                 onChange={(e) => setUsuario(e.target.value)}
                 placeholder="Nome do responsável pela retirada"
                 className="input-field"
+                disabled
+                style={{ backgroundColor: 'var(--bg-tertiary)', cursor: 'not-allowed', opacity: 0.8 }}
               />
             </div>
 

@@ -5,105 +5,176 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 
 const Login: React.FC = () => {
-    const { supabase } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+  const { supabase } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [isLogin, setIsLogin] = useState(true);
+  const [nickname, setNickname] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-    // Redirecionar para a página que o usuário tentou acessar ou home
-    const from = location.state?.from?.pathname || '/';
+  // Redirecionar para a página que o usuário tentou acessar ou home
+  const from = location.state?.from?.pathname || '/';
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError(null);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-        try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (error) throw error;
-
-            navigate(from, { replace: true });
-        } catch (err: any) {
-            setError(err.message || 'Falha ao fazer login');
-        } finally {
-            setLoading(false);
+    try {
+      if (isLogin) {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) throw error;
+      } else {
+        if (!nickname || nickname.length < 2) {
+          throw new Error('Por favor, insira um nome/apelido válido.');
         }
-    };
 
-    return (
-        <div className="login-container">
-            <div className="login-card">
-                <div className="login-header">
-                    <div className="logo-area">
-                        <div className="logo-circle">
-                            <Lock size={32} color="var(--primary-color)" />
-                        </div>
-                    </div>
-                    <h1 className="login-title">Acesso Restrito</h1>
-                    <p className="login-subtitle">Gestão de Estoque Municipal</p>
-                </div>
+        // Signup
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+        if (authError) throw authError;
 
-                <form onSubmit={handleLogin} className="login-form">
-                    {error && (
-                        <div className="error-alert">
-                            <AlertCircle size={18} />
-                            <span>{error}</span>
-                        </div>
-                    )}
+        // Create profile with nickname
+        if (authData.user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ nickname: nickname })
+            .eq('id', authData.user.id);
 
-                    <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <div className="input-icon-wrapper">
-                            <Mail className="input-icon" size={20} />
-                            <input
-                                id="email"
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="exemplo@alfenas.mg.gov.br"
-                                required
-                                className="input-with-icon"
-                            />
-                        </div>
-                    </div>
+          if (profileError) {
+            console.error('Erro ao salvar nome:', profileError);
+          }
+        }
 
-                    <div className="form-group">
-                        <label htmlFor="password">Senha</label>
-                        <div className="input-icon-wrapper">
-                            <Lock className="input-icon" size={20} />
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                required
-                                className="input-with-icon"
-                            />
-                        </div>
-                    </div>
+        if (authData.user && !authData.session) {
+          alert('Cadastro realizado! Por favor, verifique seu email para confirmar a conta antes de entrar.');
+        } else {
+          alert('Cadastro realizado com sucesso!');
+        }
+      }
 
-                    <button type="submit" className="btn-primary w-full" disabled={loading}>
-                        {loading ? (
-                            <>
-                                <Loader2 className="animate-spin" size={20} />
-                                Entrando...
-                            </>
-                        ) : (
-                            'Entrar no Sistema'
-                        )}
-                    </button>
-                </form>
+      navigate(from, { replace: true });
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      console.error('Auth Error:', err);
+      let msg = err.message;
+      if (msg.includes('Invalid login credentials')) {
+        msg = 'Email ou senha incorretos.';
+      } else if (msg.includes('Email not confirmed')) {
+        msg = 'Email não confirmado. Verifique sua caixa de entrada.';
+      }
+      setError(msg || `Falha ao ${isLogin ? 'fazer login' : 'criar conta'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="logo-area">
+            <div className="logo-circle">
+              <Lock size={32} color="var(--primary-color)" />
             </div>
+          </div>
+          <h1 className="login-title">{isLogin ? 'Acesso Restrito' : 'Criar Conta'}</h1>
+          <p className="login-subtitle">Gestão de Estoque Municipal</p>
+        </div>
 
-            <style>{`
+        <form onSubmit={handleLogin} className="login-form">
+          {error && (
+            <div className="error-alert">
+              <AlertCircle size={18} />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {!isLogin && (
+            <div className="form-group">
+              <label htmlFor="nickname">Seu Nome / Apelido</label>
+              <input
+                id="nickname"
+                type="text"
+                value={nickname}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const formatted = val.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+                  setNickname(formatted);
+                }}
+                placeholder="Como quer ser chamado"
+                required={!isLogin}
+                className="input-with-icon"
+                style={{ paddingLeft: '1rem' }}
+              />
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <div className="input-icon-wrapper">
+              <Mail className="input-icon" size={20} />
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="exemplo@alfenas.mg.gov.br"
+                required
+                className="input-with-icon"
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Senha</label>
+            <div className="input-icon-wrapper">
+              <Lock className="input-icon" size={20} />
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="input-with-icon"
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="btn-primary w-full" disabled={loading}>
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin" size={20} />
+                Processando...
+              </>
+            ) : (
+              isLogin ? 'Entrar no Sistema' : 'Criar Conta'
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            style={{
+              background: 'none', border: 'none', color: 'var(--primary-color)',
+              cursor: 'pointer', fontSize: '0.9rem', marginTop: '1rem', width: '100%'
+            }}
+          >
+            {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entrar'}
+          </button>
+        </form>
+      </div>
+
+      <style>{`
         .login-container {
           min-height: 100vh;
           display: flex;
@@ -220,8 +291,8 @@ const Login: React.FC = () => {
           font-size: var(--font-sm);
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default Login;

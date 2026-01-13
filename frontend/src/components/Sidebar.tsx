@@ -8,6 +8,7 @@ import {
   LogOut,
   History,
   Settings,
+  ShieldAlert,
   Box,
   FileText,
   Sun,
@@ -25,7 +26,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
   const { theme, toggleTheme } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   // Internal state removed: isCollapsed is now controlled by parent
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -136,6 +137,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleC
               <Settings size={18} />
               <span>Parâmetros</span>
             </NavLink>
+
+            {/* Link Restrito para Master */}
+            {user && (
+              <NavLink to="/admin/logs" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`} onClick={onClose} title="Logs (Master)" style={{ color: 'var(--accent-primary)' }}>
+                <ShieldAlert size={18} />
+                <span>Logs do Sistema</span>
+              </NavLink>
+            )}
           </div>
         </nav>
 
@@ -153,7 +162,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleC
             }}
           >
             <div className="avatar">
-              <img src={`https://ui-avatars.com/api/?name=${user?.email || 'User'}&background=3b82f6&color=fff`} alt="User" />
+              <img src={`https://ui-avatars.com/api/?name=${profile?.nickname || user?.email || 'User'}&background=3b82f6&color=fff`} alt="User" />
             </div>
             <div className="user-profile-info" style={{
               display: 'flex',
@@ -167,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleC
                 fontWeight: 'var(--font-semibold)',
                 color: 'var(--text-primary)'
               }}>
-                Usuário
+                {profile?.nickname || 'Usuário'}
               </span>
               <span className="mono" style={{
                 fontSize: 'var(--text-xs)',

@@ -7,6 +7,8 @@ import HistoricoSaidas from './pages/HistoricoSaidas';
 import ControleEstoque from './pages/ControleEstoque';
 import Relatorios from './pages/Relatorios';
 import Settings from './pages/Settings';
+import LogsAdmin from './pages/LogsAdmin';
+import SetupProfile from './pages/SetupProfile';
 import Login from './pages/Login';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -16,7 +18,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Componente para rotas protegidas
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-  const { session, loading } = useAuth();
+  const { session, loading, profile } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -25,6 +27,11 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 
   if (!session) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Force profile setup if no nickname, unless already on the setup page
+  if (!profile?.nickname && location.pathname !== '/setup-profile') {
+    return <Navigate to="/setup-profile" replace />;
   }
 
   return children;
@@ -49,6 +56,13 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
 
+          {/* Rota Protegida de Setup - Separate from main layout to avoid sidebar */}
+          <Route path="/setup-profile" element={
+            <PrivateRoute>
+              <SetupProfile />
+            </PrivateRoute>
+          } />
+
           <Route path="/" element={
             <PrivateRoute>
               <Layout />
@@ -61,6 +75,7 @@ function App() {
             <Route path="estoque" element={<ControleEstoque />} />
             <Route path="relatorios" element={<Relatorios />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="admin/logs" element={<LogsAdmin />} />
           </Route>
         </Routes>
       </AuthProvider>
