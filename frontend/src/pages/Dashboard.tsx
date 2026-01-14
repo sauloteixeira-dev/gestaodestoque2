@@ -418,9 +418,11 @@ const Dashboard: React.FC = () => {
 
       {/* Chart */}
       <div className="card-base" style={{
-        height: '340px',
+        height: 'auto',
+        minHeight: '400px',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        paddingBottom: '20px'
       }}>
         <div style={{
           display: 'flex',
@@ -472,68 +474,66 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div style={{ flex: 1, minHeight: 0, position: 'relative', width: '100%' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10B981" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#EF4444" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
+        <div style={{ width: '100%', height: '300px', marginTop: 'auto' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+                </linearGradient>
+              </defs>
 
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
 
-                <XAxis
-                  dataKey="nome"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
-                  dy={10}
-                />
+              <XAxis
+                dataKey="nome"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                dy={10}
+              />
 
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
-                />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+              />
 
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--bg-primary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
 
-                <Area
-                  type="monotone"
-                  dataKey="entrada"
-                  name="Entradas"
-                  stroke="#10B981"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorEntradas)"
-                />
+              <Area
+                type="monotone"
+                dataKey="entrada"
+                name="Entradas"
+                stroke="#10B981"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorEntradas)"
+              />
 
-                <Area
-                  type="monotone"
-                  dataKey="saida"
-                  name="Saídas"
-                  stroke="#EF4444"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorSaidas)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+              <Area
+                type="monotone"
+                dataKey="saida"
+                name="Saídas"
+                stroke="#EF4444"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorSaidas)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
 
       </div>
