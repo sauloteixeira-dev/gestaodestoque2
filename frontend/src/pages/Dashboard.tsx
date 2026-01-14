@@ -81,7 +81,16 @@ const Dashboard: React.FC = () => {
       }
     });
 
-    return Array.from(dataMap).map(([name, values]) => ({ name, ...values }));
+    const finalData = Array.from(dataMap).map(([name, values]) => ({ name, ...values }));
+    console.log('Key generation test:', {
+      todayDate: new Date(),
+      firstLoopKey: formatDate(new Date()),
+      firstDataKey: saidas.length > 0 ? formatDate(saidas[0].data_saida) : 'no-data'
+    });
+    console.log('Final Chart Data (First 5):', finalData.slice(0, 5));
+    console.log('Non-zero entries:', finalData.filter(d => d.entrada > 0 || d.saida > 0));
+
+    return finalData;
   }, [saidas, entradas]);
 
   if (loadingProdutos) {
