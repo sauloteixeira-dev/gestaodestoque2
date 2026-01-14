@@ -37,17 +37,21 @@ const Dashboard: React.FC = () => {
     const dataMap = new Map<string, { entrada: number, saida: number }>();
     const today = new Date();
 
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' });
+    };
+
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(today.getDate() - i);
-      const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dateStr = formatDate(d);
       dataMap.set(dateStr, { entrada: 0, saida: 0 });
     }
 
     saidas.forEach(saida => {
       if (!saida.data_saida) return;
       const date = new Date(saida.data_saida);
-      const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dateStr = formatDate(date);
 
       if (dataMap.has(dateStr)) {
         const current = dataMap.get(dateStr)!;
@@ -59,7 +63,7 @@ const Dashboard: React.FC = () => {
     entradas.forEach(entrada => {
       if (!entrada.data_entrada) return;
       const date = new Date(entrada.data_entrada);
-      const dateStr = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dateStr = formatDate(date);
 
       if (dataMap.has(dateStr)) {
         const current = dataMap.get(dateStr)!;

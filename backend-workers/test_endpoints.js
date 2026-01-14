@@ -1,23 +1,28 @@
+
+const baseUrl = 'https://gestao-estoque-api.gestao-estoque-saulo.workers.dev';
+
 async function testEndpoints() {
-    const baseUrl = 'https://gestao-estoque-api.gestao-estoque-saulo.workers.dev';
-
     try {
-        console.log('Testing root endpoint...');
-        const rootRes = await fetch(`${baseUrl}/`);
-        console.log('Root status:', rootRes.status);
-        console.log('Root body:', await rootRes.text());
+        console.log('Testing /saidas-estoque endpoint...');
+        const response = await fetch(`${baseUrl}/saidas-estoque`);
+        console.log('Saidas status:', response.status);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Saidas count:', data.length);
+            if (data.length > 0) {
+                console.log('First saida date (Most Recent):', data[0].data_saida);
+                console.log('Last saida date (Oldest):', data[data.length - 1].data_saida);
 
-        console.log('\nTesting /produtos endpoint...');
-        const produtosRes = await fetch(`${baseUrl}/produtos`);
-        console.log('Produtos status:', produtosRes.status);
-        if (produtosRes.ok) {
-            const data = await produtosRes.json();
-            console.log('Produtos count:', data.length);
-            console.log('First product:', data[0] ? data[0].nome : 'No products');
+                // Check if any is within 30 days
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+                const recents = data.filter(d => new Date(d.data_saida) > thirtyDaysAgo);
+                console.log('Saidas in last 30 days:', recents.length);
+            }
         } else {
-            console.log('Produtos error:', await produtosRes.text());
+            console.log('Error:', await response.text());
         }
-
     } catch (error) {
         console.error('Test failed:', error);
     }
