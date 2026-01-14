@@ -15,6 +15,8 @@ app.use('/*', cors({
         'http://localhost:5173',
         'http://localhost:3000',
         'https://gestao-estoque-five.vercel.app',
+        'https://gestao-estoque-git-cloudflare-workers-saulo-teixeiras-projects.vercel.app',
+        'https://gestao-estoque-saulo-teixeiras-projects.vercel.app'
     ],
     credentials: true,
 }));
