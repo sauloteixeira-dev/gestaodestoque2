@@ -37,8 +37,14 @@ const Dashboard: React.FC = () => {
     const dataMap = new Map<string, { entrada: number, saida: number }>();
     const today = new Date();
 
-    const formatDate = (date: Date) => {
-      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', timeZone: 'America/Sao_Paulo' });
+    const formatDate = (dateInput: Date | string) => {
+      const d = new Date(dateInput);
+      // Converte para data no fuso de SP
+      const spDate = new Date(d.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+
+      const day = spDate.getDate().toString().padStart(2, '0');
+      const month = (spDate.getMonth() + 1).toString().padStart(2, '0');
+      return `${day}/${month}`;
     };
 
     for (let i = days - 1; i >= 0; i--) {
@@ -48,22 +54,26 @@ const Dashboard: React.FC = () => {
       dataMap.set(dateStr, { entrada: 0, saida: 0 });
     }
 
+    // Debug
+    console.log('Total Saidas:', saidas.length);
+    if (saidas.length > 0) console.log('Exemplo Saida:', saidas[0]);
+
     saidas.forEach(saida => {
       if (!saida.data_saida) return;
-      const date = new Date(saida.data_saida);
-      const dateStr = formatDate(date);
+      const dateStr = formatDate(saida.data_saida);
 
       if (dataMap.has(dateStr)) {
         const current = dataMap.get(dateStr)!;
         const totalItems = saida.itens?.reduce((acc: number, item: any) => acc + item.quantidade, 0) || 0;
         dataMap.set(dateStr, { ...current, saida: current.saida + totalItems });
+      } else {
+        console.warn('Data fora do range ou string invalida:', dateStr, saida.data_saida);
       }
     });
 
     entradas.forEach(entrada => {
       if (!entrada.data_entrada) return;
-      const date = new Date(entrada.data_entrada);
-      const dateStr = formatDate(date);
+      const dateStr = formatDate(entrada.data_entrada);
 
       if (dataMap.has(dateStr)) {
         const current = dataMap.get(dateStr)!;
