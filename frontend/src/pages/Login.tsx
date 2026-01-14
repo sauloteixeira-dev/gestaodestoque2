@@ -100,7 +100,9 @@ const Login: React.FC = () => {
 
           {!isLogin && (
             <div className="form-group">
-              <label htmlFor="nickname">Seu Nome / Apelido</label>
+              <label htmlFor="nickname">
+                Seu Nome / Apelido <span style={{ color: 'var(--status-error)' }}>*</span>
+              </label>
               <input
                 id="nickname"
                 type="text"
@@ -111,7 +113,7 @@ const Login: React.FC = () => {
                   setNickname(formatted);
                 }}
                 placeholder="Como quer ser chamado"
-                required={!isLogin}
+                required
                 className="input-with-icon"
                 style={{ paddingLeft: '1rem' }}
               />
