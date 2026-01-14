@@ -26,6 +26,23 @@ async function testEndpoints() {
     } catch (error) {
         console.error('Test failed:', error);
     }
+
+    try {
+        console.log('\nTesting /entradas-estoque endpoint...');
+        const response = await fetch(`${baseUrl}/entradas-estoque`);
+        console.log('Entradas status:', response.status);
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Entradas count:', data.length);
+            if (data.length > 0) {
+                console.log('First entrada date:', data[0].data_entrada);
+            }
+        } else {
+            console.log('Error:', await response.text());
+        }
+    } catch (error) {
+        console.error('Test failed:', error);
+    }
 }
 
 testEndpoints();

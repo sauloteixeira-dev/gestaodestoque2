@@ -1,13 +1,17 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, User } from '@supabase/supabase-js';
 
 type Bindings = {
     SUPABASE_URL: string;
     SUPABASE_SERVICE_KEY: string;
 };
 
-const app = new Hono<{ Bindings: Bindings }>();
+type Variables = {
+    user: User;
+};
+
+const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 
 // Middleware CORS
 app.use('/*', cors({

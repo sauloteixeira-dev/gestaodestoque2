@@ -54,10 +54,6 @@ const Dashboard: React.FC = () => {
       dataMap.set(dateStr, { entrada: 0, saida: 0 });
     }
 
-    // Debug
-    console.log('Total Saidas:', saidas.length);
-    if (saidas.length > 0) console.log('Exemplo Saida:', saidas[0]);
-
     saidas.forEach(saida => {
       if (!saida.data_saida) return;
       const dateStr = formatDate(saida.data_saida);
@@ -66,8 +62,6 @@ const Dashboard: React.FC = () => {
         const current = dataMap.get(dateStr)!;
         const totalItems = saida.itens?.reduce((acc: number, item: any) => acc + item.quantidade, 0) || 0;
         dataMap.set(dateStr, { ...current, saida: current.saida + totalItems });
-      } else {
-        console.warn('Data fora do range ou string invalida:', dateStr, saida.data_saida);
       }
     });
 
@@ -82,15 +76,9 @@ const Dashboard: React.FC = () => {
     });
 
     const finalData = Array.from(dataMap).map(([name, values]) => ({ name, ...values }));
-    console.log('Key generation test:', {
-      todayDate: new Date(),
-      firstLoopKey: formatDate(new Date()),
-      firstDataKey: saidas.length > 0 ? formatDate(saidas[0].data_saida) : 'no-data'
-    });
-    console.log('Final Chart Data (First 5):', finalData.slice(0, 5));
-    console.log('Non-zero entries:', finalData.filter(d => d.entrada > 0 || d.saida > 0));
 
     return finalData;
+
   }, [saidas, entradas]);
 
   if (loadingProdutos) {
@@ -483,8 +471,8 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div style={{ width: '100%', height: 300, minHeight: 300 }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div style={{ width: '100%' }}>
+          <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
@@ -492,8 +480,8 @@ const Dashboard: React.FC = () => {
                   <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.1} />
-                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
                 </linearGradient>
               </defs>
 
@@ -536,7 +524,7 @@ const Dashboard: React.FC = () => {
                 type="monotone"
                 dataKey="saida"
                 name="Saídas"
-                stroke="#EF4444"
+                stroke="#8B5CF6"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorSaidas)"
