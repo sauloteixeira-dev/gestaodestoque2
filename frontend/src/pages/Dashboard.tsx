@@ -483,7 +483,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        <div style={{ width: '100%', height: '300px', marginTop: 'auto' }}>
+        <div style={{ width: '100%', height: 300, minHeight: 300 }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
@@ -500,7 +500,7 @@ const Dashboard: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
 
               <XAxis
-                dataKey="nome"
+                dataKey="name"
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
