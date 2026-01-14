@@ -504,7 +504,7 @@ const Dashboard: React.FC = () => {
 
                 <Area
                   type="monotone"
-                  dataKey="entradas"
+                  dataKey="entrada"
                   name="Entradas"
                   stroke="#10B981"
                   strokeWidth={2}
@@ -514,7 +514,7 @@ const Dashboard: React.FC = () => {
 
                 <Area
                   type="monotone"
-                  dataKey="saidas"
+                  dataKey="saida"
                   name="Saídas"
                   stroke="#EF4444"
                   strokeWidth={2}
