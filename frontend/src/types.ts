@@ -19,7 +19,7 @@ export interface ItemSaida {
     quantidade: number;
     produto_nome?: string;
     produto_codigo_barras?: string;
-    produto_quantidade_antes: number;
+    produto_quantidade_antes?: number;
     produto?: {
         unidade?: string;
     };

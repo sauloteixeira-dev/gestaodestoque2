@@ -17,7 +17,6 @@ interface Movimentacao {
   observacao?: string;
 }
 
-import { authenticatedFetch } from '../services/api';
 
 const Relatorios: React.FC = () => {
   const { saidas } = useSaida();

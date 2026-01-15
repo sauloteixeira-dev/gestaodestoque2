@@ -386,7 +386,7 @@ const HistoricoSaidas: React.FC = () => {
                               <td style={{ padding: '8px', color: '#000', border: '1px solid #000' }}>
                                 {item.produto_nome}
                                 {/* Exibir unidade se disponível e não estiver no nome (para compatibilidade retroativa) */}
-                                {item.produto?.unidade && !item.produto_nome.includes(item.produto.unidade) && (
+                                {item.produto?.unidade && item.produto_nome && !item.produto_nome.includes(item.produto.unidade) && (
                                   <span style={{ marginLeft: '4px' }}>{item.produto.unidade}</span>
                                 )}
                               </td>
@@ -517,7 +517,7 @@ const HistoricoSaidas: React.FC = () => {
                           <td style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>
                             {item.produto_nome}
                             {/* Exibir unidade se disponível e não estiver no nome (para compatibilidade retroativa) */}
-                            {item.produto?.unidade && !item.produto_nome.includes(item.produto.unidade) && (
+                            {item.produto?.unidade && item.produto_nome && !item.produto_nome.includes(item.produto.unidade) && (
                               <span style={{ marginLeft: '4px' }}>{item.produto.unidade}</span>
                             )}
                           </td>

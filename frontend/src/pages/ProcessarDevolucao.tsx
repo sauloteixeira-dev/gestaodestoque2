@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { type SaidaEstoque, type ItemDevolucao } from '../types';
+import { type SaidaEstoque } from '../types';
 import { useDevolucao } from '../context/DevolucaoContext';
 import { useSaida } from '../context/SaidaContext';
 import { useProdutos } from '../context/ProdutoContext';
