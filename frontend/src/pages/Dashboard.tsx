@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
+import { useDevolucao } from '../context/DevolucaoContext';
 import {
   AreaChart, Area,
   XAxis,
@@ -16,6 +17,7 @@ import { supabase } from '../lib/supabase';
 const Dashboard: React.FC = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
   const { saidas } = useSaida();
+  const { devolucoes } = useDevolucao();
   const [entradas, setEntradas] = React.useState<any[]>([]);
   const navigate = useNavigate();
 
@@ -40,7 +42,7 @@ const Dashboard: React.FC = () => {
 
   const chartData = useMemo(() => {
     const days = 30;
-    const dataMap = new Map<string, { entrada: number, saida: number }>();
+    const dataMap = new Map<string, { entrada: number, saida: number, devolucao: number }>();
     const today = new Date();
 
     const formatDate = (dateInput: Date | string) => {
@@ -57,7 +59,7 @@ const Dashboard: React.FC = () => {
       const d = new Date();
       d.setDate(today.getDate() - i);
       const dateStr = formatDate(d);
-      dataMap.set(dateStr, { entrada: 0, saida: 0 });
+      dataMap.set(dateStr, { entrada: 0, saida: 0, devolucao: 0 });
     }
 
     saidas.forEach(saida => {
@@ -81,11 +83,22 @@ const Dashboard: React.FC = () => {
       }
     });
 
+    devolucoes.forEach(devolucao => {
+      if (!devolucao.data_devolucao) return;
+      const dateStr = formatDate(devolucao.data_devolucao);
+
+      if (dataMap.has(dateStr)) {
+        const current = dataMap.get(dateStr)!;
+        const totalItems = devolucao.itens?.reduce((acc: number, item: any) => acc + item.quantidade_devolvida, 0) || 0;
+        dataMap.set(dateStr, { ...current, devolucao: current.devolucao + totalItems });
+      }
+    });
+
     const finalData = Array.from(dataMap).map(([name, values]) => ({ name, ...values }));
 
     return finalData;
 
-  }, [saidas, entradas]);
+  }, [saidas, entradas, devolucoes]);
 
   if (loadingProdutos) {
     return (
@@ -475,6 +488,20 @@ const Dashboard: React.FC = () => {
               }}></div>
               <span className="text-secondary">Saídas</span>
             </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              fontSize: 'var(--text-xs)'
+            }}>
+              <div style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: 'var(--radius-sm)',
+                background: '#f59e0b'
+              }}></div>
+              <span className="text-secondary">Devoluções</span>
+            </div>
           </div>
         </div>
         <div style={{ width: '100%' }}>
@@ -488,6 +515,10 @@ const Dashboard: React.FC = () => {
                 <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.1} />
                   <stop offset="95%" stopColor="#8B5CF6" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="colorDevolucoes" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
                 </linearGradient>
               </defs>
 
@@ -534,6 +565,16 @@ const Dashboard: React.FC = () => {
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorSaidas)"
+              />
+
+              <Area
+                type="monotone"
+                dataKey="devolucao"
+                name="Devoluções"
+                stroke="#F59E0B"
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorDevolucoes)"
               />
             </AreaChart>
           </ResponsiveContainer>
