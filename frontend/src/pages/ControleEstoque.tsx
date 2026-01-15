@@ -185,7 +185,7 @@ const ControleEstoque: React.FC = () => {
                     return (
                       <tr key={produto.id}>
                         <td className="hide-mobile mono">{produto.codigo_barras}</td>
-                        <td>{produto.nome}</td>
+                        <td>{produto.nome} {produto.unidade}</td>
                         <td style={{ textAlign: 'center' }}>
                           <span className="mono" style={{
                             color: statusColor,
@@ -285,7 +285,7 @@ const ControleEstoque: React.FC = () => {
                     {chunk.map((item) => (
                       <tr key={item.id}>
                         <td style={{ padding: '8px', color: '#000', border: '1px solid #000', fontSize: '12px' }}>{item.codigo_barras || '-'}</td>
-                        <td style={{ padding: '8px', color: '#000', border: '1px solid #000', fontSize: '12px' }}>{item.nome}</td>
+                        <td style={{ padding: '8px', color: '#000', border: '1px solid #000', fontSize: '12px' }}>{item.nome} {item.unidade}</td>
                         <td style={{ padding: '8px', textAlign: 'center', color: '#000', border: '1px solid #000', fontSize: '12px', fontWeight: 'bold' }}>{item.quantidade}</td>
                         <td style={{ padding: '8px', textAlign: 'center', color: '#000', border: '1px solid #000', fontSize: '12px' }}>
                           {item.quantidade === 0 ? 'SEM ESTOQUE' : item.quantidade <= limiteEstoqueCritico ? 'CRÍTICO' : 'NORMAL'}

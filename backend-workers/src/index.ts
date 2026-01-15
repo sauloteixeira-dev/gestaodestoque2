@@ -648,7 +648,7 @@ app.get('/devolucoes', async (c) => {
                     usuario_retirada,
                     local:locais_saida(nome)
                 ),
-                itens:itens_devolucao(*)
+                itens:itens_devolucao(*, produto:produtos(unidade))
             `)
             .order('data_devolucao', { ascending: false });
 
@@ -703,7 +703,7 @@ app.get('/devolucoes/:id', async (c) => {
                     *,
                     local:locais_saida(nome)
                 ),
-                itens:itens_devolucao(*)
+                itens:itens_devolucao(*, produto:produtos(unidade))
             `)
             .eq('id', id)
             .single();

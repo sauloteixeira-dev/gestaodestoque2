@@ -65,7 +65,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           local:locais_saida(nome),
           itens:itens_saida(
             *,
-            produto:produtos(nome, codigo_barras)
+            produto:produtos(nome, codigo_barras, unidade)
           ),
           devolucoes:devolucoes(
             *,
@@ -90,7 +90,10 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           produto_nome: item.produto?.nome || 'Produto não encontrado',
           produto_codigo_barras: item.produto?.codigo_barras || 'N/A',
           quantidade: item.quantidade,
-          produto_quantidade_antes: item.produto_quantidade_antes || 0
+          produto_quantidade_antes: item.produto_quantidade_antes || 0,
+          produto: {
+            unidade: item.produto?.unidade
+          }
         })) || []
       }));
 

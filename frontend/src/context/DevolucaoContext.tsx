@@ -46,7 +46,10 @@ export const DevolucaoProvider: React.FC<{ children: ReactNode }> = ({ children 
                         usuario_retirada,
                         local:locais_saida(nome)
                     ),
-                    itens:itens_devolucao(*)
+                    itens:itens_devolucao(
+                        *,
+                        produto:produtos(unidade)
+                    )
                 `)
                 .order('data_devolucao', { ascending: false });
 
@@ -98,7 +101,10 @@ export const DevolucaoProvider: React.FC<{ children: ReactNode }> = ({ children 
                         *,
                         local:locais_saida(nome)
                     ),
-                    itens:itens_devolucao(*)
+                    itens:itens_devolucao(
+                        *,
+                        produto:produtos(unidade)
+                    )
                 `)
                 .eq('id', devolucaoId)
                 .single();
@@ -140,10 +146,12 @@ export const DevolucaoProvider: React.FC<{ children: ReactNode }> = ({ children 
         try {
             console.log('Validando devolução para saída ID:', saidaId);
 
-            // 1. Buscar itens da saída
             const { data: itensSaida, error: errorItens } = await supabase
                 .from('itens_saida')
-                .select('*')
+                .select(`
+                    *,
+                    produto:produtos(unidade)
+                `)
                 .eq('saida_id', saidaId);
 
             if (errorItens) throw errorItens;
@@ -183,7 +191,10 @@ export const DevolucaoProvider: React.FC<{ children: ReactNode }> = ({ children 
                     produto_codigo_barras: item.produto_codigo_barras,
                     quantidade_original: item.quantidade,
                     quantidade_ja_devolvida: totalJaDevolvido,
-                    quantidade_disponivel_devolucao: quantidadeDisponivel
+                    quantidade_disponivel_devolucao: quantidadeDisponivel,
+                    produto: {
+                        unidade: item.produto?.unidade
+                    }
                 };
             });
 

@@ -22,6 +22,7 @@ interface ItemParaDevolucao {
     quantidade_a_devolver: number;
     selecionado: boolean;
     motivo?: string;
+    produto_unidade?: string;
 }
 
 const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose, onSuccess }) => {
@@ -64,7 +65,8 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
                 quantidade_disponivel: item.quantidade_disponivel_devolucao,
                 quantidade_a_devolver: 0,
                 selecionado: false,
-                motivo: ''
+                motivo: '',
+                produto_unidade: item.produto?.unidade
             }));
 
             setItensDisponiveis(itens);
@@ -291,7 +293,14 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
                                                         />
                                                     </td>
                                                     <td>
-                                                        <div style={{ fontWeight: 'var(--font-medium)' }}>{item.produto_nome}</div>
+                                                        <div style={{ fontWeight: 'var(--font-medium)' }}>
+                                                            {item.produto_nome}
+                                                            {item.produto_unidade && (
+                                                                <span style={{ marginLeft: '4px', color: 'var(--text-muted)', fontSize: '0.9em' }}>
+                                                                    {item.produto_unidade}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                         {item.produto_codigo_barras && (
                                                             <div className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
                                                                 {item.produto_codigo_barras}
