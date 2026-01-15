@@ -66,6 +66,10 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           itens:itens_saida(
             *,
             produto:produtos(nome, codigo_barras)
+          ),
+          devolucoes:devolucoes(
+            *,
+            itens:itens_devolucao(*)
           )
         `)
         .order('data_saida', { ascending: false });

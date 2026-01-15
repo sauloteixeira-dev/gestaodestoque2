@@ -173,7 +173,7 @@ const EstoqueBaixo: React.FC = () => {
                                 {produtosFiltrados.map(produto => (
                                     <tr key={produto.id}>
                                         <td className="hide-mobile" style={{ fontFamily: 'monospace', color: 'var(--text-muted)' }}>{produto.codigo_barras}</td>
-                                        <td style={{ fontWeight: 500 }}>{produto.nome}</td>
+                                        <td style={{ fontWeight: 500 }}>{produto.nome} {produto.unidade}</td>
                                         <td style={{ textAlign: 'center', fontWeight: 'bold', color: produto.quantidade <= 5 ? '#f87171' : 'var(--text-primary)' }}>
                                             {produto.quantidade}
                                         </td>
@@ -261,7 +261,7 @@ const EstoqueBaixo: React.FC = () => {
                                         {chunk.map((item) => (
                                             <tr key={item.id}>
                                                 <td>{item.codigo_barras}</td>
-                                                <td>{item.nome}</td>
+                                                <td>{item.nome} {item.unidade}</td>
                                                 <td style={{ textAlign: 'center', fontWeight: 'bold' }}>{item.quantidade}</td>
                                             </tr>
                                         ))}

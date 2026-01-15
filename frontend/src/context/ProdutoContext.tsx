@@ -7,7 +7,7 @@ import { type Produto } from '../types';
 interface ProdutoContextData {
   produtos: Produto[];
   loading: boolean;
-  adicionarProduto: (codigoBarras: string, nome: string, quantidade: number) => Promise<void>;
+  adicionarProduto: (codigoBarras: string, nome: string, quantidade: number, unidade?: string) => Promise<void>;
   darBaixaEstoque: (produtoId: number, quantidadeBaixa: number) => Promise<void>;
   darEntradaEstoque: (produto: Produto, quantidadeEntrada: number) => Promise<void>;
   excluirProduto: (produtoId: number) => Promise<void>;
@@ -42,11 +42,11 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
     fetchProdutos();
   }, []);
 
-  const adicionarProduto = async (codigoBarras: string, nome: string, quantidade: number) => {
+  const adicionarProduto = async (codigoBarras: string, nome: string, quantidade: number, unidade?: string) => {
     try {
       const { data, error } = await supabase
         .from('produtos')
-        .insert({ codigo_barras: codigoBarras, nome, quantidade })
+        .insert({ codigo_barras: codigoBarras, nome, quantidade, unidade })
         .select()
         .single();
 

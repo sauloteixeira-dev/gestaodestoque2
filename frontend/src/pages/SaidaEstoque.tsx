@@ -165,7 +165,7 @@ const SaidaEstoque: React.FC = () => {
                       color: 'var(--text-primary)',
                       marginBottom: 'var(--space-1)'
                     }}>
-                      {produto.nome}
+                      {produto.nome} {produto.unidade}
                     </div>
                     <div style={{
                       fontSize: 'var(--text-sm)',

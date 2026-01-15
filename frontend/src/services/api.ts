@@ -18,6 +18,9 @@ export const authenticatedFetch = async (endpoint: string, options: RequestInit 
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,
         headers,
+    }).catch(err => {
+        console.error(`Falha na rede ao chamar ${endpoint}:`, err);
+        throw new Error(`Erro de rede ao conectar com o servidor para ${endpoint}. Verifique sua conexão.`);
     });
 
     return response;

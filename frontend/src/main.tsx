@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { ProdutoProvider } from './context/ProdutoContext'
 import { SaidaProvider } from './context/SaidaContext'
+import { DevolucaoProvider } from './context/DevolucaoContext'
 import { LogsExclusaoProvider } from './context/LogsExclusaoContext'
 import { ThemeProvider } from './context/ThemeContext'
 import App from './App.tsx'
@@ -14,12 +15,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ThemeProvider>
         <ProdutoProvider>
           <SaidaProvider>
-            <LogsExclusaoProvider>
-              <App />
-            </LogsExclusaoProvider>
+            <DevolucaoProvider>
+              <LogsExclusaoProvider>
+                <App />
+              </LogsExclusaoProvider>
+            </DevolucaoProvider>
           </SaidaProvider>
         </ProdutoProvider>
       </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
 )
+

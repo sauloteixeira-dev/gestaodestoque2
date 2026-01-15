@@ -7,7 +7,8 @@ const CadastroProduto: React.FC = () => {
   const { produtos, adicionarProduto, darEntradaEstoque } = useProdutos();
   const [codigoBarras, setCodigoBarras] = useState('');
   const [nome, setNome] = useState('');
-  const [quantidade, setQuantidade] = useState(1);
+  const [quantidade, setQuantidade] = useState<number | string>('');
+  const [unidade, setUnidade] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [produtoExistente, setProdutoExistente] = useState<any>(null);
   const [quantidadeAdicional, setQuantidadeAdicional] = useState(1);
@@ -52,10 +53,16 @@ const CadastroProduto: React.FC = () => {
         setQuantidadeAdicional(1);
         setIsAddingToExisting(false);
       } else {
-        await adicionarProduto(codigoBarras, nome, quantidade);
+        const qtdNumber = typeof quantidade === 'string' ? parseInt(quantidade) : quantidade;
+        if (!qtdNumber || qtdNumber <= 0) {
+          // Should not happen due to required, but for safety
+          return;
+        }
+        await adicionarProduto(codigoBarras, nome, qtdNumber, unidade);
         setCodigoBarras('');
         setNome('');
-        setQuantidade(1);
+        setQuantidade('');
+        setUnidade('');
       }
       setProdutoExistente(null);
     } catch (error) {
@@ -191,7 +198,7 @@ const CadastroProduto: React.FC = () => {
                       marginBottom: 'var(--space-2)',
                       color: 'var(--text-primary)'
                     }}>
-                      {produtoExistente.nome}
+                      {produtoExistente.nome} {produtoExistente.unidade}
                     </div>
                     <div style={{
                       fontSize: 'var(--text-sm)',
@@ -274,7 +281,7 @@ const CadastroProduto: React.FC = () => {
               <>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: '2fr 1fr',
+                  gridTemplateColumns: '2fr 1fr 1fr',
                   gap: 'var(--space-4)'
                 }}>
                   <div className="form-group" style={{ margin: 0 }}>
@@ -293,15 +300,39 @@ const CadastroProduto: React.FC = () => {
 
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="label">
+                      Unidade
+                    </label>
+                    <input
+                      list="unidades-list"
+                      type="text"
+                      value={unidade}
+                      onChange={(e) => setUnidade(e.target.value.toUpperCase())}
+                      placeholder="Ex: UN"
+                      className="input-field"
+                      required
+                    />
+                    <datalist id="unidades-list">
+                      <option value="UN" />
+                      <option value="KG" />
+                      <option value="CX" />
+                      <option value="PCT" />
+                      <option value="M" />
+                      <option value="L" />
+                    </datalist>
+                  </div>
+
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label className="label">
                       Quantidade Inicial
                     </label>
                     <input
                       type="number"
                       value={quantidade}
-                      onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
+                      onChange={(e) => setQuantidade(e.target.value)}
                       className="input-field mono"
                       min="1"
                       required
+                      placeholder=""
                       style={{
                         textAlign: 'center',
                         fontSize: 'var(--text-lg)',

@@ -17,6 +17,9 @@ const app = new Hono<{ Bindings: Bindings, Variables: Variables }>();
 app.use('/*', cors({
     origin: [
         'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:5174',
         'http://localhost:3000',
         'https://gestao-estoque-five.vercel.app',
         'https://gestao-estoque-git-cloudflare-workers-saulo-teixeiras-projects.vercel.app',
@@ -83,7 +86,7 @@ app.get('/produtos', async (c) => {
 // Rota para adicionar um produto ou atualizar a quantidade (Protegida)
 app.post('/produtos', authenticateUser, async (c) => {
     const supabase = getSupabase(c);
-    const { codigo_barras, nome, quantidade } = await c.req.json();
+    const { codigo_barras, nome, quantidade, unidade } = await c.req.json();
     const user = c.get('user');
 
     if (!codigo_barras || !nome || quantidade == null || quantidade <= 0) {
@@ -94,7 +97,8 @@ app.post('/produtos', authenticateUser, async (c) => {
         const { error } = await supabase.rpc('adicionar_ou_atualizar_produto', {
             p_codigo_barras: codigo_barras,
             p_nome: nome,
-            p_quantidade: quantidade
+            p_quantidade: quantidade,
+            p_unidade: unidade || null
         });
 
         if (error) throw error;
@@ -288,7 +292,7 @@ app.post('/saidas-estoque', authenticateUser, async (c) => {
                 .insert([{
                     saida_id: saida.id,
                     produto_id: item.produto_id,
-                    produto_nome: produto.nome,
+                    produto_nome: produto.unidade ? `${produto.nome} ${produto.unidade}` : produto.nome,
                     produto_codigo_barras: produto.codigo_barras,
                     quantidade: item.quantidade,
                     produto_quantidade_antes: produto.quantidade
@@ -313,7 +317,8 @@ app.get('/saidas-estoque', async (c) => {
             .select(`
         *,
         local:locais_saida(nome),
-        itens:itens_saida(*)
+        itens:itens_saida(*, produto:produtos(unidade)),
+        devolucoes:devolucoes(*, itens:itens_devolucao(*, produto:produtos(unidade)))
       `)
             .order('data_saida', { ascending: false });
 
@@ -392,6 +397,7 @@ app.post('/api/entrada-estoque', async (c) => {
                         nome: item.nome,
                         quantidade: item.quantidade,
                         codigo_barras: item.codigo,
+                        unidade: item.unidade,
                     }])
                     .select()
                     .single();
@@ -468,6 +474,350 @@ app.get('/entradas-estoque', async (c) => {
         return c.json(entradasEnriquecidas);
     } catch (err: any) {
         console.error('Erro ao buscar entradas:', err);
+        return c.json({ error: err.message }, 500);
+    }
+});
+
+// ===================================================
+// ROTAS DE DEVOLUÇÃO
+// ===================================================
+
+// Rota para criar uma devolução (Protegida)
+app.post('/devolucoes', authenticateUser, async (c) => {
+    const supabase = getSupabase(c);
+    const { saida_id, observacao, itens } = await c.req.json();
+    const user = c.get('user');
+
+    // Validações básicas
+    if (!saida_id || !itens || !Array.isArray(itens) || itens.length === 0) {
+        return c.json({ error: 'Dados incompletos. É necessário informar a saída e os itens a devolver.' }, 400);
+    }
+
+    try {
+        // 1. Verificar se a saída existe
+        const { data: saida, error: errorSaida } = await supabase
+            .from('saidas_estoque')
+            .select('*')
+            .eq('id', saida_id)
+            .single();
+
+        if (errorSaida || !saida) {
+            return c.json({ error: 'Saída não encontrada.' }, 404);
+        }
+
+        // 2. Buscar itens da saída original
+        const { data: itensSaida, error: errorItensSaida } = await supabase
+            .from('itens_saida')
+            .select('*')
+            .eq('saida_id', saida_id);
+
+        if (errorItensSaida) throw errorItensSaida;
+
+        // 3. OTIMIZAÇÃO: Buscar todas as devoluções anteriores para os itens desta saída de uma vez
+        const itemSaidaIds = itensSaida?.map(i => i.id) || [];
+        const { data: todasDevolucoesAnteriores, error: errorDevAnt } = await supabase
+            .from('itens_devolucao')
+            .select('item_saida_id, quantidade_devolvida')
+            .in('item_saida_id', itemSaidaIds);
+
+        if (errorDevAnt) throw errorDevAnt;
+
+        // Agrupar quantidades devolvidas por item_saida_id para fácil consulta
+        const resumoDevolucoes = (todasDevolucoesAnteriores || []).reduce((acc: any, curr) => {
+            acc[curr.item_saida_id] = (acc[curr.item_saida_id] || 0) + curr.quantidade_devolvida;
+            return acc;
+        }, {});
+
+        // 4. Validar cada item a ser devolvido
+        for (const itemDevolucao of itens) {
+            const itemOriginal = itensSaida?.find(i => i.id === itemDevolucao.item_saida_id);
+            if (!itemOriginal) {
+                return c.json({ error: `Item de saída ${itemDevolucao.item_saida_id} não encontrado nesta saída.` }, 400);
+            }
+
+            const totalJaDevolvido = resumoDevolucoes[itemDevolucao.item_saida_id] || 0;
+            const quantidadeDisponivel = itemOriginal.quantidade - totalJaDevolvido;
+
+            if (itemDevolucao.quantidade_devolvida <= 0) {
+                return c.json({ error: `Quantidade de devolução deve ser maior que zero para o produto ${itemOriginal.produto_nome}.` }, 400);
+            }
+
+            if (itemDevolucao.quantidade_devolvida > quantidadeDisponivel) {
+                return c.json({
+                    error: `Quantidade de devolução (${itemDevolucao.quantidade_devolvida}) excede a disponível (${quantidadeDisponivel}) para o produto ${itemOriginal.produto_nome}.`
+                }, 400);
+            }
+        }
+
+        // 5. Criar registro de devolução
+        const { data: devolucao, error: errorDevolucao } = await supabase
+            .from('devolucoes')
+            .insert([{
+                saida_id,
+                observacao,
+                user_id: user.id,
+                comprovante_numero: '' // Preenchido pelo trigger
+            }])
+            .select()
+            .single();
+
+        if (errorDevolucao) throw errorDevolucao;
+
+        // 6. OTIMIZAÇÃO: Buscar todos os produtos envolvidos de uma vez
+        const produtoIds = [...new Set(itens.map(i => i.produto_id))];
+        const { data: produtosAtuais, error: errorProdutos } = await supabase
+            .from('produtos')
+            .select('*')
+            .in('id', produtoIds);
+
+        if (errorProdutos) throw errorProdutos;
+
+        const produtosMap = new Map(produtosAtuais?.map(p => [p.id, p]));
+        const itensParaInserir = [];
+        let totalItensDevolvidos = 0;
+
+        // 7. Processar cada item e preparar inserção/atualização
+        for (const itemDevolucao of itens) {
+            const produto = produtosMap.get(itemDevolucao.produto_id);
+            if (!produto) continue;
+
+            // Registrar registro de devolução
+            itensParaInserir.push({
+                devolucao_id: devolucao.id,
+                item_saida_id: itemDevolucao.item_saida_id,
+                produto_id: itemDevolucao.produto_id,
+                produto_nome: produto.unidade ? `${produto.nome} ${produto.unidade}` : produto.nome,
+                produto_codigo_barras: produto.codigo_barras,
+                quantidade_devolvida: itemDevolucao.quantidade_devolvida,
+                motivo: itemDevolucao.motivo
+            });
+
+            // Atualizar estoque (ainda um por um para segurança, mas podemos otimizar mais no futuro)
+            const novaQuantidade = produto.quantidade + itemDevolucao.quantidade_devolvida;
+            await supabase
+                .from('produtos')
+                .update({ quantidade: novaQuantidade })
+                .eq('id', itemDevolucao.produto_id);
+
+            totalItensDevolvidos += itemDevolucao.quantidade_devolvida;
+        }
+
+        // 8. OTIMIZAÇÃO: Inserir todos os itens da devolução em um único comando
+        if (itensParaInserir.length > 0) {
+            const { error: errorBulkInsert } = await supabase
+                .from('itens_devolucao')
+                .insert(itensParaInserir);
+
+            if (errorBulkInsert) throw errorBulkInsert;
+        }
+
+        // 9. Atualizar saída
+        const { error: errorUpdateSaida } = await supabase
+            .from('saidas_estoque')
+            .update({
+                tem_devolucao: true,
+                total_itens_devolvidos: (saida.total_itens_devolvidos || 0) + totalItensDevolvidos
+            })
+            .eq('id', saida_id);
+
+        if (errorUpdateSaida) throw errorUpdateSaida;
+
+        return c.json({
+            message: 'Devolução processada com sucesso!',
+            devolucao_id: devolucao.id,
+            comprovante_numero: devolucao.comprovante_numero
+        }, 201);
+
+    } catch (err: any) {
+        console.error('Erro ao processar devolução:', err);
+        return c.json({ error: err.message }, 500);
+    }
+});
+
+// Rota para listar todas as devoluções
+app.get('/devolucoes', async (c) => {
+    const supabase = getSupabase(c);
+    try {
+        const { data: devolucoes, error } = await supabase
+            .from('devolucoes')
+            .select(`
+                *,
+                saida:saidas_estoque(
+                    id,
+                    data_saida,
+                    usuario_retirada,
+                    local:locais_saida(nome)
+                ),
+                itens:itens_devolucao(*)
+            `)
+            .order('data_devolucao', { ascending: false });
+
+        if (error) throw error;
+
+        // Enriquecer com informações de usuário
+        const userIds = [...new Set(devolucoes.map(d => d.user_id).filter(Boolean))];
+
+        let profilesMap = new Map();
+        if (userIds.length > 0) {
+            const { data: profiles, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, nickname, email')
+                .in('id', userIds);
+
+            if (!profilesError && profiles) {
+                profilesMap = new Map(profiles.map(p => [p.id, p]));
+            }
+        }
+
+        const devolucoesEnriquecidas = devolucoes.map(devolucao => {
+            const profile = profilesMap.get(devolucao.user_id);
+            const nomeUsuario = profile ? (profile.nickname || profile.email) : 'Usuário desconhecido';
+            return {
+                ...devolucao,
+                usuario: {
+                    nickname: profile?.nickname,
+                    email: profile?.email,
+                    nome: nomeUsuario
+                }
+            };
+        });
+
+        return c.json(devolucoesEnriquecidas);
+    } catch (err: any) {
+        console.error('Erro ao buscar devoluções:', err);
+        return c.json({ error: err.message }, 500);
+    }
+});
+
+// Rota para buscar detalhes de uma devolução específica
+app.get('/devolucoes/:id', async (c) => {
+    const supabase = getSupabase(c);
+    const id = c.req.param('id');
+
+    try {
+        const { data: devolucao, error } = await supabase
+            .from('devolucoes')
+            .select(`
+                *,
+                saida:saidas_estoque(
+                    *,
+                    local:locais_saida(nome)
+                ),
+                itens:itens_devolucao(*)
+            `)
+            .eq('id', id)
+            .single();
+
+        if (error) {
+            if (error.code === 'PGRST116') {
+                return c.json({ error: 'Devolução não encontrada.' }, 404);
+            }
+            throw error;
+        }
+
+        // Buscar informações do usuário
+        if (devolucao.user_id) {
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('nickname, email')
+                .eq('id', devolucao.user_id)
+                .single();
+
+            if (profile) {
+                devolucao.usuario = {
+                    nickname: profile.nickname,
+                    email: profile.email,
+                    nome: profile.nickname || profile.email
+                };
+            }
+        }
+
+        return c.json(devolucao);
+    } catch (err: any) {
+        console.error('Erro ao buscar devolução:', err);
+        return c.json({ error: err.message }, 500);
+    }
+});
+
+// Rota para validar se uma saída pode ter devolução
+app.get('/saidas-estoque/:id/validar-devolucao', async (c) => {
+    const supabase = getSupabase(c);
+    const id = c.req.param('id');
+
+    try {
+        // Buscar a saída
+        const { data: saida, error: errorSaida } = await supabase
+            .from('saidas_estoque')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (errorSaida) {
+            if (errorSaida.code === 'PGRST116') {
+                return c.json({ error: 'Saída não encontrada.' }, 404);
+            }
+            throw errorSaida;
+        }
+
+        // Buscar itens da saída
+        const { data: itensSaida, error: errorItens } = await supabase
+            .from('itens_saida')
+            .select('*')
+            .eq('saida_id', id);
+
+        if (errorItens) throw errorItens;
+
+        if (!itensSaida || itensSaida.length === 0) {
+            return c.json({
+                pode_devolver: false,
+                motivo: 'A saída não possui itens.',
+                itens: []
+            });
+        }
+
+        // Buscar TODAS as devoluções já feitas para os itens desta saída em uma única consulta
+        const itemSaidaIds = itensSaida.map(i => i.id);
+        const { data: todasDevolucoes, error: errorDevs } = await supabase
+            .from('itens_devolucao')
+            .select('item_saida_id, quantidade_devolvida')
+            .in('item_saida_id', itemSaidaIds);
+
+        if (errorDevs) throw errorDevs;
+
+        // Criar um mapa de quantidades já devolvidas por item_saida_id
+        const mapaDevolucoes = (todasDevolucoes || []).reduce((acc: any, dev) => {
+            acc[dev.item_saida_id] = (acc[dev.item_saida_id] || 0) + dev.quantidade_devolvida;
+            return acc;
+        }, {});
+
+        // Mapear os itens com a disponibilidade calculada
+        const itensComDisponibilidade = itensSaida.map(item => {
+            const totalJaDevolvido = mapaDevolucoes[item.id] || 0;
+            const quantidadeDisponivel = item.quantidade - totalJaDevolvido;
+
+            return {
+                item_saida_id: item.id,
+                produto_id: item.produto_id,
+                produto_nome: item.produto_nome,
+                produto_codigo_barras: item.produto_codigo_barras,
+                quantidade_original: item.quantidade,
+                quantidade_ja_devolvida: totalJaDevolvido,
+                quantidade_disponivel_devolucao: quantidadeDisponivel
+            };
+        });
+
+        // Verificar se há pelo menos um item com quantidade disponível
+        const podeDevolver = itensComDisponibilidade.some(item => item.quantidade_disponivel_devolucao > 0);
+
+        return c.json({
+            pode_devolver: podeDevolver,
+            motivo: podeDevolver ? null : 'Todos os itens desta saída já foram devolvidos.',
+            saida_id: saida.id,
+            itens: itensComDisponibilidade
+        });
+
+    } catch (err: any) {
+        console.error('Erro ao validar devolução:', err);
         return c.json({ error: err.message }, 500);
     }
 });

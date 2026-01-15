@@ -89,6 +89,12 @@
     --status-warning: #f59e0b;
     --status-error: #ef4444;
     --status-info: #3b82f6;
+
+    /* Semantic Backgrounds */
+    --status-success-bg: rgba(16, 185, 129, 0.1);
+    --status-warning-bg: rgba(245, 158, 11, 0.1);
+    --status-error-bg: rgba(239, 68, 68, 0.1);
+    --status-info-bg: rgba(59, 130, 246, 0.1);
   }
 
   :root.dark {
@@ -133,6 +139,12 @@
     --status-warning: #f59e0b;
     --status-error: #ef4444;
     --status-info: #3b82f6;
+
+    /* Semantic Backgrounds (Dark) */
+    --status-success-bg: rgba(16, 185, 129, 0.15);
+    --status-warning-bg: rgba(245, 158, 11, 0.15);
+    --status-error-bg: rgba(239, 68, 68, 0.15);
+    --status-info-bg: rgba(59, 130, 246, 0.15);
   }
 
   /* Transition default only */

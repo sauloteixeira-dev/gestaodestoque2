@@ -11,7 +11,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { Package, AlertTriangle, ShoppingCart, ArrowUpRight, PlusCircle, MinusCircle } from 'lucide-react';
-import { authenticatedFetch } from '../services/api';
+import { supabase } from '../lib/supabase';
 
 const Dashboard: React.FC = () => {
   const { produtos, loading: loadingProdutos } = useProdutos();
@@ -20,16 +20,22 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    authenticatedFetch('/entradas-estoque')
-      .then(res => {
-        if (!res.ok) throw new Error('Backend indisponível');
-        return res.json();
-      })
-      .then(data => setEntradas(data))
-      .catch(() => {
-        // Backend indisponível - gráfico mostrará apenas saídas
+    const fetchEntradas = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('entradas_estoque')
+          .select('*')
+          .order('data_entrada', { ascending: false });
+
+        if (error) throw error;
+        setEntradas(data || []);
+      } catch (err) {
+        console.error('Erro ao buscar entradas para dashboard:', err);
         setEntradas([]);
-      });
+      }
+    };
+
+    fetchEntradas();
   }, []);
 
   const chartData = useMemo(() => {

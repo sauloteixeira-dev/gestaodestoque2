@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSaida } from '../context/SaidaContext';
+import { useDevolucao } from '../context/DevolucaoContext';
+import { supabase } from '../lib/supabase';
 
-type MovimentacaoTipo = 'ENTRADA' | 'SAIDA';
+type MovimentacaoTipo = 'ENTRADA' | 'SAIDA' | 'DEVOLUCAO';
 
 interface Movimentacao {
   id: string;
@@ -12,31 +14,66 @@ interface Movimentacao {
   quantidade: number;
   local?: string;
   usuario?: string;
+  observacao?: string;
 }
 
 import { authenticatedFetch } from '../services/api';
 
 const Relatorios: React.FC = () => {
   const { saidas } = useSaida();
+  const { devolucoes, fetchDevolucoes } = useDevolucao();
   const [movimentacoes, setMovimentacoes] = useState<Movimentacao[]>([]);
   const [filtroTipo, setFiltroTipo] = useState<'TODOS' | MovimentacaoTipo>('TODOS');
 
   useEffect(() => {
+    fetchDevolucoes();
+  }, []);
+
+  useEffect(() => {
     const fetchEntradas = async () => {
       try {
-        const response = await authenticatedFetch('/entradas-estoque');
-        if (!response.ok) throw new Error('Backend indisponível');
-        const entradas = await response.json();
+        const { data: entradas, error } = await supabase
+          .from('entradas_estoque')
+          .select(`
+            *,
+            produto:produtos(nome, codigo_barras, unidade)
+          `)
+          .order('data_entrada', { ascending: false });
 
-        const movimentacoesEntrada: Movimentacao[] = entradas.map((entrada: any) => ({
-          id: `entrada-${entrada.id}`,
-          tipo: 'ENTRADA' as MovimentacaoTipo,
-          data: entrada.data_entrada,
-          produto_nome: entrada.produto?.nome || 'Produto não informado',
-          produto_codigo: entrada.produto?.codigo_barras || undefined,
-          quantidade: entrada.quantidade,
-          usuario: entrada.usuario_entrada || undefined
-        }));
+        if (error) throw error;
+
+        // Buscar perfis de usuários para as entradas E devoluções
+        const entradaUserIds = (entradas || []).map((e: any) => e.user_id).filter(Boolean);
+        const devolucaoUserIds = devolucoes.map((d: any) => d.user_id).filter(Boolean);
+        const allUserIds = Array.from(new Set([...entradaUserIds, ...devolucaoUserIds]));
+
+        let profilesMap = new Map();
+
+        if (allUserIds.length > 0) {
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, nickname, email')
+            .in('id', allUserIds);
+
+          if (profiles) {
+            profilesMap = new Map(profiles.map(p => [p.id, p]));
+          }
+        }
+
+        const movimentacoesEntrada: Movimentacao[] = (entradas || []).map((entrada: any) => {
+          const profile = profilesMap.get(entrada.user_id);
+          const nomeUsuario = profile ? (profile.nickname || profile.email) : 'Usuário desconhecido';
+
+          return {
+            id: `entrada-${entrada.id}`,
+            tipo: 'ENTRADA' as MovimentacaoTipo,
+            data: entrada.data_entrada,
+            produto_nome: entrada.produto ? (entrada.produto.unidade ? `${entrada.produto.nome} ${entrada.produto.unidade}` : entrada.produto.nome) : 'Produto não informado',
+            produto_codigo: entrada.produto?.codigo_barras || undefined,
+            quantidade: entrada.quantidade,
+            usuario: nomeUsuario
+          };
+        });
 
         const movimentacoesSaida: Movimentacao[] = saidas.flatMap(saida =>
           (saida.itens || []).map(item => ({
@@ -51,12 +88,31 @@ const Relatorios: React.FC = () => {
           }))
         );
 
-        const todasMovimentacoes = [...movimentacoesEntrada, ...movimentacoesSaida]
+        const movimentacoesDevolucao: Movimentacao[] = devolucoes.flatMap(devolucao =>
+          (devolucao.itens || []).map(item => {
+            const profile = profilesMap.get(devolucao.user_id);
+            const nomeUsuario = profile ? (profile.nickname || profile.email) : (devolucao.usuario?.nome || 'Usuário desconhecido');
+
+            return {
+              id: `devolucao-${devolucao.id}-${item.item_saida_id}`,
+              tipo: 'DEVOLUCAO' as MovimentacaoTipo,
+              data: devolucao.data_devolucao,
+              produto_nome: item.produto_nome || 'Produto não informado',
+              produto_codigo: item.produto_codigo_barras || undefined,
+              quantidade: item.quantidade_devolvida,
+              local: devolucao.saida?.local?.nome || undefined,
+              usuario: nomeUsuario,
+              observacao: item.motivo || devolucao.observacao || undefined
+            };
+          })
+        );
+
+        const todasMovimentacoes = [...movimentacoesEntrada, ...movimentacoesSaida, ...movimentacoesDevolucao]
           .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 
         setMovimentacoes(todasMovimentacoes);
       } catch (error) {
-        // Backend indisponível - mostrar apenas saídas
+        // Backend indisponível - mostrar apenas saídas e devoluções
         const movimentacoesSaida: Movimentacao[] = saidas.flatMap(saida =>
           (saida.itens || []).map(item => ({
             id: `saida-${saida.id}-${item.produto_codigo_barras}`,
@@ -70,14 +126,29 @@ const Relatorios: React.FC = () => {
           }))
         );
 
-        setMovimentacoes(movimentacoesSaida.sort((a, b) =>
-          new Date(b.data).getTime() - new Date(a.data).getTime()
-        ));
+        const movimentacoesDevolucao: Movimentacao[] = devolucoes.flatMap(devolucao =>
+          (devolucao.itens || []).map(item => ({
+            id: `devolucao-${devolucao.id}-${item.item_saida_id}`,
+            tipo: 'DEVOLUCAO' as MovimentacaoTipo,
+            data: devolucao.data_devolucao,
+            produto_nome: item.produto_nome || 'Produto não informado',
+            produto_codigo: item.produto_codigo_barras || undefined,
+            quantidade: item.quantidade_devolvida,
+            local: devolucao.saida?.local?.nome || undefined,
+            usuario: devolucao.usuario?.nome || undefined,
+            observacao: item.motivo || devolucao.observacao || undefined
+          }))
+        );
+
+        const todas = [...movimentacoesSaida, ...movimentacoesDevolucao]
+          .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+
+        setMovimentacoes(todas);
       }
     };
 
     fetchEntradas();
-  }, [saidas]);
+  }, [saidas, devolucoes]); // Added devolucoes and fetchDevolucoes to dependencies to fix potential infinite loop
 
   const formatarData = (dataString: string) => {
     return new Date(dataString).toLocaleString('pt-BR');
@@ -114,6 +185,12 @@ const Relatorios: React.FC = () => {
         >
           Saídas ({movimentacoes.filter(m => m.tipo === 'SAIDA').length})
         </button>
+        <button
+          onClick={() => setFiltroTipo('DEVOLUCAO')}
+          className={`tab-button ${filtroTipo === 'DEVOLUCAO' ? 'tab-active' : ''}`}
+        >
+          Devoluções ({movimentacoes.filter(m => m.tipo === 'DEVOLUCAO').length})
+        </button>
       </div>
 
       <div className="card-base">
@@ -137,8 +214,10 @@ const Relatorios: React.FC = () => {
                     <td style={{ textAlign: 'center' }}>
                       {mov.tipo === 'ENTRADA' ? (
                         <div className="badge badge-success">ENTRADA</div>
-                      ) : (
+                      ) : mov.tipo === 'SAIDA' ? (
                         <div className="badge badge-warning">SAÍDA</div>
+                      ) : (
+                        <div className="badge badge-info" style={{ background: 'var(--info-bg)', color: 'var(--info-text)' }}>DEVOLUÇÃO</div>
                       )}
                     </td>
                     <td>{mov.produto_nome}</td>
@@ -146,13 +225,32 @@ const Relatorios: React.FC = () => {
                     <td style={{ textAlign: 'center' }}>
                       <span className="mono" style={{
                         fontWeight: 'var(--font-semibold)',
-                        color: mov.tipo === 'ENTRADA' ? 'var(--status-success)' : 'var(--status-warning)'
+                        color: mov.tipo === 'ENTRADA' || mov.tipo === 'DEVOLUCAO' ? 'var(--status-success)' : 'var(--status-warning)'
                       }}>
-                        {mov.tipo === 'ENTRADA' ? '+' : '-'}{mov.quantidade}
+                        {mov.tipo === 'ENTRADA' || mov.tipo === 'DEVOLUCAO' ? '+' : '-'}{mov.quantidade}
                       </span>
                     </td>
                     <td className="hide-mobile" style={{ color: 'var(--text-secondary)' }}>
-                      {mov.usuario || mov.local || '-'}
+                      <div className="text-primary" style={{ fontWeight: 'var(--font-medium)' }}>
+                        {mov.local || '-'}
+                      </div>
+                      {mov.usuario && <div className="text-muted" style={{ fontSize: '12px' }}>Usuário: {mov.usuario}</div>}
+                      {mov.observacao && (
+                        <div style={{
+                          marginTop: '4px',
+                          padding: '4px 8px',
+                          background: 'var(--muted)',
+                          borderRadius: '6px',
+                          fontSize: '11px',
+                          border: '1px solid var(--border)',
+                          fontStyle: 'italic',
+                          color: 'var(--text-secondary)',
+                          display: 'inline-block',
+                          maxWidth: '100%'
+                        }}>
+                          💬 {mov.observacao}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -169,7 +267,7 @@ const Relatorios: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 };
 
