@@ -22,12 +22,13 @@ Sistema completo de gestão de estoque desenvolvido para a **Prefeitura Municipa
 - Quantidade inicial configurável
 
 ### 📥 Entrada de Estoque
-- **Entrada Manual**: Cadastro individual de produtos
-- **Importação de NFe (XML)**: 
+- **Cadastro Manual**: Registro individual de produtos com código de barras
+- **Importação de NFe (XML)** 🧪 *(Em Testes)*: 
   - Upload de XML da Nota Fiscal Eletrônica
   - Extração automática de produtos via API Workers
   - Registro em lote de múltiplos itens
   - Leitura de código de barras da chave de acesso
+  - *Funcionalidade experimental em desenvolvimento*
 
 ### 📤 Saída de Estoque
 - Seleção múltipla de produtos via código de barras
@@ -207,8 +208,9 @@ vercel --prod
 ## 🔄 Fluxo de Trabalho Típico
 
 1. **Entrada de Produtos**:
-   - Upload de XML da NFe OU cadastro manual
-   - Produtos cadastrados automaticamente com código de barras e unidade
+   - Cadastro manual via código de barras
+   - *(Opcional)* Upload de XML da NFe (funcionalidade em testes)
+   - Produtos registrados com código de barras, nome e unidade de medida
 
 2. **Saída de Produtos**:
    - Escanear código de barras dos produtos
