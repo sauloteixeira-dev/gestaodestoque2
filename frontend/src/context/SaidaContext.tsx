@@ -29,7 +29,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const { data, error } = await supabase
         .from('locais_saida')
         .select('*')
-        .order('data_criacao', { ascending: false });
+        .order('nome', { ascending: true });
 
       if (error) {
         console.error('[SaidaContext] Erro na query locais_saida:', error);
