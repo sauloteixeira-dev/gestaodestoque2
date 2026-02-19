@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useSaida } from '../context/SaidaContext';
 import { useDevolucao } from '../context/DevolucaoContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { type SaidaEstoque, type Devolucao } from '../types';
 import Pagination from '../components/Pagination';
 import { Search } from 'lucide-react';
@@ -13,6 +14,7 @@ const HistoricoSaidas: React.FC = () => {
   const { saidas, loading, buscarSaidas } = useSaida();
   const { buscarDevolucao } = useDevolucao();
   const { profile: currentUserProfile, user: currentUser } = useAuth();
+  const { colors } = useTheme();
   const [saidaSelecionada, setSaidaSelecionada] = useState<SaidaEstoque | null>(null);
   const [saidaParaDevolucao, setSaidaParaDevolucao] = useState<SaidaEstoque | null>(null);
   const [devolucaoSelecionada, setDevolucaoSelecionada] = useState<Devolucao | null>(null);
@@ -296,9 +298,27 @@ const HistoricoSaidas: React.FC = () => {
         <div className="documento-modal-overlay">
           <div className="documento-modal">
 
-            <div className="documento-header no-print">
-              <h2>Documento de Saída</h2>
-              <button onClick={fecharDocumento} className="btn-fechar">✕</button>
+            <div className="documento-header no-print" style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 'var(--space-4)',
+              borderBottom: '1px solid var(--border)'
+            }}>
+              <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 'var(--font-semibold)' }}>Documento de Saída</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <button
+                  onClick={() => {
+                    const element = document.getElementById('documento-para-impressao');
+                    if (element) { window.print(); }
+                  }}
+                  className="btn-primary"
+                  style={{ padding: '6px 16px', minWidth: 'auto', display: 'flex', alignItems: 'center', gap: '6px', background: colors.primary }}
+                >
+                  🖨️ Imprimir
+                </button>
+                <button onClick={fecharDocumento} className="btn-primary" style={{ padding: '6px 12px', minWidth: 'auto' }}>✕</button>
+              </div>
             </div>
 
             <div className="documento-content" id="documento-para-impressao" style={{ background: '#eee', padding: '20px' }}>
@@ -414,7 +434,12 @@ const HistoricoSaidas: React.FC = () => {
               })()}
             </div>
 
-            <div className="documento-actions no-print">
+            <div className="documento-actions no-print" style={{
+              display: 'flex',
+              gap: 'var(--space-3)',
+              padding: 'var(--space-4)',
+              justifyContent: 'center'
+            }}>
               <button
                 onClick={() => {
                   const element = document.getElementById('documento-para-impressao');
@@ -422,158 +447,184 @@ const HistoricoSaidas: React.FC = () => {
                     window.print();
                   }
                 }}
-                className="btn-fechar-doc"
+                className="btn-primary"
+                style={{ background: colors.primary }}
               >
                 🖨️ Imprimir Documento de Saída
               </button>
-              <button onClick={fecharDocumento} className="btn-fechar-doc">
+              <button onClick={fecharDocumento} className="btn-primary">
                 Fechar
               </button>
             </div>
           </div>
         </div>
-      )}
+      )
+      }
 
       {/* Modal do Comprovante de Devolução */}
-      {devolucaoSelecionada && (<>
-        <div className="documento-modal-overlay">
-          <div className="documento-modal">
-            <div className="documento-header no-print">
-              <h2>Comprovante de Devolução</h2>
-              <button onClick={() => setDevolucaoSelecionada(null)} className="btn-fechar">✕</button>
-            </div>
-
-            <div className="documento-content" id="documento-devolucao-impressao" style={{ background: 'var(--bg-secondary)', padding: '20px' }}>
-              <div className="folha-devolucao" style={{
-                background: 'white',
-                width: '100%',
-                maxWidth: '21cm',
-                minHeight: '29.7cm',
-                margin: '0 auto',
-                padding: '1.5cm',
+      {
+        devolucaoSelecionada && (<>
+          <div className="documento-modal-overlay">
+            <div className="documento-modal">
+              <div className="documento-header no-print" style={{
                 display: 'flex',
-                flexDirection: 'column',
-                color: '#000',
-                boxSizing: 'border-box'
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 'var(--space-4)',
+                borderBottom: '1px solid var(--border)'
               }}>
-                <div className="documento-cabecalho" style={{
+                <h2 style={{ margin: 0, fontSize: 'var(--text-xl)', fontWeight: 'var(--font-semibold)' }}>Comprovante de Devolução</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <button
+                    onClick={() => { window.print(); }}
+                    className="btn-primary"
+                    style={{ padding: '6px 16px', minWidth: 'auto', display: 'flex', alignItems: 'center', gap: '6px', background: colors.primary }}
+                  >
+                    🖨️ Imprimir
+                  </button>
+                  <button onClick={() => setDevolucaoSelecionada(null)} className="btn-primary" style={{ padding: '6px 12px', minWidth: 'auto' }}>✕</button>
+                </div>
+              </div>
+
+              <div className="documento-content" id="documento-devolucao-impressao" style={{ background: 'var(--bg-secondary)', padding: '20px' }}>
+                <div className="folha-devolucao" style={{
+                  background: 'white',
+                  width: '100%',
+                  maxWidth: '21cm',
+                  minHeight: '29.7cm',
+                  margin: '0 auto',
+                  padding: '1.5cm',
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '20px',
-                  borderBottom: '2px solid #000',
-                  paddingBottom: '20px'
+                  flexDirection: 'column',
+                  color: '#000',
+                  boxSizing: 'border-box'
                 }}>
-                  <div className="logo-esq" style={{ width: '100px', textAlign: 'center' }}>
-                    <img src="/images/brasao.png" alt="Brasão Alfenas" style={{ width: '100%', maxWidth: '80px' }} />
-                  </div>
-                  <div className="titulo-centro" style={{ flex: 1, textAlign: 'center', color: '#000' }}>
-                    <h2 style={{ margin: '0 0 5px 0', fontSize: '16px', textTransform: 'uppercase', fontWeight: 'bold', color: '#000' }}>Prefeitura Municipal de Alfenas</h2>
-                    <h3 style={{ margin: '0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'normal', color: '#000' }}>Secretaria de Ação Social</h3>
-                  </div>
-                  <div className="logo-dir" style={{ width: '100px', textAlign: 'center' }}>
-                    <img src="/images/cras-logo.png" alt="Logo CRAS" style={{ width: '100%', maxWidth: '100px' }} />
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-                  <h2 style={{ fontSize: '18px', fontWeight: 'bold', textDecoration: 'underline', color: '#000', margin: 0 }}>Comprovante de Devolução</h2>
-                  <p style={{ margin: '5px 0 0 0', fontSize: '14px', fontWeight: 'bold', color: '#000' }}>Nº {devolucaoSelecionada.comprovante_numero}</p>
-                </div>
-
-                <div className="documento-info" style={{ marginBottom: '20px' }}>
-                  <h3 style={{ fontSize: '16px', borderBottom: '1px solid #000', paddingBottom: '5px', marginBottom: '10px', color: '#000' }}>Informações Gerais</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                    <div>
-                      <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Data da Devolução:</strong> {formatarData(devolucaoSelecionada.data_devolucao)}</p>
-                      <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Processado por:</strong> {formatName(devolucaoSelecionada.usuario?.nome || currentUserProfile?.nickname || currentUser?.email || 'Não informado')}</p>
+                  <div className="documento-cabecalho" style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                    borderBottom: '2px solid #000',
+                    paddingBottom: '20px'
+                  }}>
+                    <div className="logo-esq" style={{ width: '100px', textAlign: 'center' }}>
+                      <img src="/images/brasao.png" alt="Brasão Alfenas" style={{ width: '100%', maxWidth: '80px' }} />
                     </div>
-                    <div>
-                      <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Saída Original:</strong> #{devolucaoSelecionada.saida_id}</p>
-                      <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Local:</strong> {devolucaoSelecionada.saida?.local?.nome || 'Não informado'}</p>
+                    <div className="titulo-centro" style={{ flex: 1, textAlign: 'center', color: '#000' }}>
+                      <h2 style={{ margin: '0 0 5px 0', fontSize: '16px', textTransform: 'uppercase', fontWeight: 'bold', color: '#000' }}>Prefeitura Municipal de Alfenas</h2>
+                      <h3 style={{ margin: '0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'normal', color: '#000' }}>Secretaria de Ação Social</h3>
+                    </div>
+                    <div className="logo-dir" style={{ width: '100px', textAlign: 'center' }}>
+                      <img src="/images/cras-logo.png" alt="Logo CRAS" style={{ width: '100%', maxWidth: '100px' }} />
                     </div>
                   </div>
-                  {devolucaoSelecionada.observacao && (
-                    <div style={{ marginTop: '10px', padding: '10px', background: '#f5f5f5', border: '1px solid #ccc' }}>
-                      <p style={{ fontSize: '14px', margin: 0, color: '#000' }}><strong>Observações/Motivo:</strong> {devolucaoSelecionada.observacao}</p>
-                    </div>
-                  )}
-                </div>
 
-                <div className="documentos-itens" style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '16px', marginBottom: '10px', color: '#000' }}>Relação de Itens Devolvidos</h3>
-                  <table className="print-table">
-                    <thead>
-                      <tr style={{ background: '#f0f0f0' }}>
-                        <th style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>Produto</th>
-                        <th style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>Cód. Barras</th>
-                        <th style={{ textAlign: 'center', padding: '8px', width: '80px', border: '1px solid #000', color: '#000' }}>Qtd</th>
-                        <th style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>Motivo</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {devolucaoSelecionada.itens?.map((item, idx) => (
-                        <tr key={idx}>
-                          <td style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>
-                            {item.produto_nome}
-                            {/* Exibir unidade se disponível e não estiver no nome (para compatibilidade retroativa) */}
-                            {item.produto?.unidade && item.produto_nome && !item.produto_nome.includes(item.produto.unidade) && (
-                              <span style={{ marginLeft: '4px' }}>{item.produto.unidade}</span>
-                            )}
-                          </td>
-                          <td style={{ padding: '8px', border: '1px solid #000', color: '#000' }} className="mono">{item.produto_codigo_barras || '-'}</td>
-                          <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #000', color: '#000' }}>{item.quantidade_devolvida}</td>
-                          <td style={{ padding: '8px', fontSize: '12px', border: '1px solid #000', color: '#000' }}>{item.motivo || '-'}</td>
+                  <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <h2 style={{ fontSize: '18px', fontWeight: 'bold', textDecoration: 'underline', color: '#000', margin: 0 }}>Comprovante de Devolução</h2>
+                    <p style={{ margin: '5px 0 0 0', fontSize: '14px', fontWeight: 'bold', color: '#000' }}>Nº {devolucaoSelecionada.comprovante_numero}</p>
+                  </div>
+
+                  <div className="documento-info" style={{ marginBottom: '20px' }}>
+                    <h3 style={{ fontSize: '16px', borderBottom: '1px solid #000', paddingBottom: '5px', marginBottom: '10px', color: '#000' }}>Informações Gerais</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      <div>
+                        <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Data da Devolução:</strong> {formatarData(devolucaoSelecionada.data_devolucao)}</p>
+                        <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Processado por:</strong> {formatName(devolucaoSelecionada.usuario?.nome || currentUserProfile?.nickname || currentUser?.email || 'Não informado')}</p>
+                      </div>
+                      <div>
+                        <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Saída Original:</strong> #{devolucaoSelecionada.saida_id}</p>
+                        <p style={{ fontSize: '14px', margin: '4px 0', color: '#000' }}><strong>Local:</strong> {devolucaoSelecionada.saida?.local?.nome || 'Não informado'}</p>
+                      </div>
+                    </div>
+                    {devolucaoSelecionada.observacao && (
+                      <div style={{ marginTop: '10px', padding: '10px', background: '#f5f5f5', border: '1px solid #ccc' }}>
+                        <p style={{ fontSize: '14px', margin: 0, color: '#000' }}><strong>Observações/Motivo:</strong> {devolucaoSelecionada.observacao}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="documentos-itens" style={{ flex: 1 }}>
+                    <h3 style={{ fontSize: '16px', marginBottom: '10px', color: '#000' }}>Relação de Itens Devolvidos</h3>
+                    <table className="print-table">
+                      <thead>
+                        <tr style={{ background: '#f0f0f0' }}>
+                          <th style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>Produto</th>
+                          <th style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>Cód. Barras</th>
+                          <th style={{ textAlign: 'center', padding: '8px', width: '80px', border: '1px solid #000', color: '#000' }}>Qtd</th>
+                          <th style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>Motivo</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <div className="documento-footer" style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
-                    <div className="assinatura">
-                      <p style={{ marginBottom: '5px', color: '#000' }}>_______________________________________</p>
-                      <p style={{ fontWeight: 'bold', fontSize: '12px', color: '#000' }}>Conferido por</p>
-                    </div>
-                    <div className="assinatura">
-                      <p style={{ marginBottom: '5px', color: '#000' }}>_______________________________________</p>
-                      <p style={{ fontWeight: 'bold', fontSize: '12px', color: '#000' }}>Assinatura do Responsável</p>
-                    </div>
+                      </thead>
+                      <tbody>
+                        {devolucaoSelecionada.itens?.map((item, idx) => (
+                          <tr key={idx}>
+                            <td style={{ padding: '8px', border: '1px solid #000', color: '#000' }}>
+                              {item.produto_nome}
+                              {/* Exibir unidade se disponível e não estiver no nome (para compatibilidade retroativa) */}
+                              {item.produto?.unidade && item.produto_nome && !item.produto_nome.includes(item.produto.unidade) && (
+                                <span style={{ marginLeft: '4px' }}>{item.produto.unidade}</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '8px', border: '1px solid #000', color: '#000' }} className="mono">{item.produto_codigo_barras || '-'}</td>
+                            <td style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #000', color: '#000' }}>{item.quantidade_devolvida}</td>
+                            <td style={{ padding: '8px', fontSize: '12px', border: '1px solid #000', color: '#000' }}>{item.motivo || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="data-documento" style={{ marginTop: '30px', fontSize: '11px', color: '#000' }}>
-                    <p>Documento gerado pelo StockOS em {formatarData(new Date().toISOString())}</p>
+
+                  <div className="documento-footer" style={{ marginTop: 'auto', paddingTop: '40px', textAlign: 'center' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+                      <div className="assinatura">
+                        <p style={{ marginBottom: '5px', color: '#000' }}>_______________________________________</p>
+                        <p style={{ fontWeight: 'bold', fontSize: '12px', color: '#000' }}>Conferido por</p>
+                      </div>
+                      <div className="assinatura">
+                        <p style={{ marginBottom: '5px', color: '#000' }}>_______________________________________</p>
+                        <p style={{ fontWeight: 'bold', fontSize: '12px', color: '#000' }}>Assinatura do Responsável</p>
+                      </div>
+                    </div>
+                    <div className="data-documento" style={{ marginTop: '30px', fontSize: '11px', color: '#000' }}>
+                      <p>Documento gerado pelo StockOS em {formatarData(new Date().toISOString())}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="documento-actions no-print">
-              <button
-                onClick={() => {
-                  window.print();
-                }}
-                className="btn-fechar-doc"
-              >
-                🖨️ Imprimir Comprovante de Devolução
-              </button>
-              <button onClick={() => setDevolucaoSelecionada(null)} className="btn-fechar-doc">
-                Fechar
-              </button>
+              <div className="documento-actions no-print" style={{
+                display: 'flex',
+                gap: 'var(--space-3)',
+                padding: 'var(--space-4)',
+                justifyContent: 'center'
+              }}>
+                <button
+                  onClick={() => {
+                    window.print();
+                  }}
+                  className="btn-primary"
+                  style={{ background: colors.primary }}
+                >
+                  🖨️ Imprimir Comprovante de Devolução
+                </button>
+                <button onClick={() => setDevolucaoSelecionada(null)} className="btn-primary">
+                  Fechar
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      </>)
+          </div >
+        </>)
       }
 
       {/* Modal de Processamento de Devolução */}
-      {saidaParaDevolucao && (
-        <ProcessarDevolucao
-          saida={saidaParaDevolucao}
-          onClose={fecharDevolucao}
-          onSuccess={handleDevolucaoSuccess}
-        />
-      )}
+      {
+        saidaParaDevolucao && (
+          <ProcessarDevolucao
+            saida={saidaParaDevolucao}
+            onClose={fecharDevolucao}
+            onSuccess={handleDevolucaoSuccess}
+          />
+        )
+      }
 
       <style>{`
         .documento-modal-overlay {
@@ -678,7 +729,7 @@ const HistoricoSaidas: React.FC = () => {
           }
         }
       `}</style>
-    </div>
+    </div >
 
   );
 };

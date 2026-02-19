@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
+import { useTheme } from '../context/ThemeContext';
 import { Printer, Search } from 'lucide-react';
 import Pagination from '../components/Pagination';
 
@@ -9,6 +10,7 @@ const ITEMS_PER_PAGE = 10;
 
 const ControleEstoque: React.FC = () => {
   const { produtos, loading } = useProdutos();
+  const { colors } = useTheme();
   const [filtro, setFiltro] = useState<FiltroEstoque>('todos');
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -71,11 +73,12 @@ const ControleEstoque: React.FC = () => {
           </div>
           <button
             onClick={() => window.print()}
-            className="btn-secondary"
+            className="btn-primary"
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 'var(--space-2)'
+              gap: 'var(--space-2)',
+              background: colors.primary
             }}
           >
             <Printer size={18} />

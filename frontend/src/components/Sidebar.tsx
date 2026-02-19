@@ -232,35 +232,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleC
       {/* Collapse Button - Floating outside sidebar */}
       <button
         onClick={toggleCollapse}
-        className="sidebar-collapse-btn"
+        className={`sidebar-collapse-btn ${isCollapsed ? 'collapsed' : ''}`}
         style={{
           position: 'fixed',
-          left: isCollapsed ? '68px' : '248px',
+          left: `calc(${isCollapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'} - var(--sidebar-overlap-offset))`,
           top: 'var(--space-6)',
-          background: 'var(--bg-secondary)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-md)',
-          color: 'var(--text-secondary)',
-          cursor: 'pointer',
-          padding: 'var(--space-2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          width: '32px',
-          height: '32px',
           zIndex: 100,
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border-strong)';
-          e.currentTarget.style.backgroundColor = 'var(--hover-bg)';
-          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.15)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border)';
-          e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
-          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+          transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         title={isCollapsed ? 'Expandir Menu' : 'Colapsar Menu'}
       >

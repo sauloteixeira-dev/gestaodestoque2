@@ -11,7 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer
 } from 'recharts';
-import { Package, AlertTriangle, ShoppingCart, ArrowUpRight, PlusCircle, MinusCircle } from 'lucide-react';
+import { Package, AlertTriangle, ShoppingCart, ArrowUpRight, ArrowDownRight, PlusCircle, MinusCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Dashboard: React.FC = () => {
@@ -100,6 +100,51 @@ const Dashboard: React.FC = () => {
 
   }, [saidas, entradas, devolucoes]);
 
+  const totalProducts = produtos.filter(p => p.quantidade > 0).length;
+  const criticalItems = produtos.filter(p => p.quantidade > 0 && p.quantidade < 10).length;
+  const outOfStock = produtos.filter(p => p.quantidade === 0).length;
+
+  // Calcular variação real mês atual vs mês anterior
+  const statsVariacao = useMemo(() => {
+    const agora = new Date();
+    const mesAtualInicio = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const mesAnteriorInicio = new Date(agora.getFullYear(), agora.getMonth() - 1, 1);
+    const mesAnteriorFim = new Date(agora.getFullYear(), agora.getMonth(), 0, 23, 59, 59);
+
+    const entradasMesAtual = entradas
+      .filter(e => e.data_entrada && new Date(e.data_entrada) >= mesAtualInicio)
+      .reduce((acc, e) => acc + (e.quantidade || 0), 0);
+    const entradasMesAnterior = entradas
+      .filter(e => e.data_entrada && new Date(e.data_entrada) >= mesAnteriorInicio && new Date(e.data_entrada) <= mesAnteriorFim)
+      .reduce((acc, e) => acc + (e.quantidade || 0), 0);
+
+    let variacaoEntradas = 0;
+    if (entradasMesAnterior > 0) {
+      variacaoEntradas = ((entradasMesAtual - entradasMesAnterior) / entradasMesAnterior) * 100;
+    } else if (entradasMesAtual > 0) {
+      variacaoEntradas = 100;
+    }
+
+    const saidasMesAtual = saidas
+      .filter(s => s.data_saida && new Date(s.data_saida) >= mesAtualInicio)
+      .length;
+    const saidasMesAnterior = saidas
+      .filter(s => s.data_saida && new Date(s.data_saida) >= mesAnteriorInicio && new Date(s.data_saida) <= mesAnteriorFim)
+      .length;
+
+    let variacaoSaidas = 0;
+    if (saidasMesAnterior > 0) {
+      variacaoSaidas = ((saidasMesAtual - saidasMesAnterior) / saidasMesAnterior) * 100;
+    } else if (saidasMesAtual > 0) {
+      variacaoSaidas = 100;
+    }
+
+    return {
+      entradas: { valor: variacaoEntradas, mesAtual: entradasMesAtual, mesAnterior: entradasMesAnterior },
+      saidas: { valor: variacaoSaidas, mesAtual: saidasMesAtual, mesAnterior: saidasMesAnterior }
+    };
+  }, [entradas, saidas]);
+
   if (loadingProdutos) {
     return (
       <div style={{
@@ -113,10 +158,6 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-
-  const totalProducts = produtos.filter(p => p.quantidade > 0).length;
-  const criticalItems = produtos.filter(p => p.quantidade > 0 && p.quantidade < 10).length;
-  const outOfStock = produtos.filter(p => p.quantidade === 0).length;
 
   return (
     <div style={{ minWidth: '0' }}>
@@ -261,7 +302,12 @@ const Dashboard: React.FC = () => {
                 {totalProducts}
               </div>
             </div>
-            <div className="icon-container">
+            <div style={{
+              padding: 'var(--space-3)',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              color: '#60a5fa'
+            }}>
               <Package size={20} />
             </div>
           </div>
@@ -270,11 +316,15 @@ const Dashboard: React.FC = () => {
             alignItems: 'center',
             gap: 'var(--space-1)',
             fontSize: 'var(--text-xs)',
-            color: 'var(--status-success)',
+            color: statsVariacao.entradas.valor > 0 ? 'var(--status-success)' : statsVariacao.entradas.valor < 0 ? '#ef4444' : 'var(--text-muted)',
             fontWeight: 'var(--font-semibold)'
           }}>
-            <ArrowUpRight size={14} />
-            <span>+2.5% desde o último mês</span>
+            {statsVariacao.entradas.valor >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            <span>
+              {statsVariacao.entradas.valor === 0
+                ? 'Sem variação este mês'
+                : `${statsVariacao.entradas.valor > 0 ? '+' : ''}${statsVariacao.entradas.valor.toFixed(1)}% vs mês anterior`}
+            </span>
           </div>
         </div>
 
@@ -309,7 +359,9 @@ const Dashboard: React.FC = () => {
                 {saidas.length}
               </div>
             </div>
-            <div className="icon-container" style={{
+            <div style={{
+              padding: 'var(--space-3)',
+              borderRadius: 'var(--radius-lg)',
               backgroundColor: 'rgba(139, 92, 246, 0.1)',
               color: '#a78bfa'
             }}>
@@ -321,11 +373,15 @@ const Dashboard: React.FC = () => {
             alignItems: 'center',
             gap: 'var(--space-1)',
             fontSize: 'var(--text-xs)',
-            color: 'var(--status-success)',
+            color: statsVariacao.saidas.valor > 0 ? 'var(--status-success)' : statsVariacao.saidas.valor < 0 ? '#ef4444' : 'var(--text-muted)',
             fontWeight: 'var(--font-semibold)'
           }}>
-            <ArrowUpRight size={14} />
-            <span>+1.2% este mês</span>
+            {statsVariacao.saidas.valor >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            <span>
+              {statsVariacao.saidas.valor === 0
+                ? 'Sem variação este mês'
+                : `${statsVariacao.saidas.valor > 0 ? '+' : ''}${statsVariacao.saidas.valor.toFixed(1)}% vs mês anterior`}
+            </span>
           </div>
         </div>
 
@@ -365,18 +421,23 @@ const Dashboard: React.FC = () => {
                 {criticalItems}
               </div>
             </div>
-            <div className="icon-container-error">
+            <div style={{
+              padding: 'var(--space-3)',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              color: '#f87171'
+            }}>
               <AlertTriangle size={20} />
             </div>
           </div>
           {criticalItems > 0 ? (
-            <div className="badge badge-error">
+            <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--font-semibold)', color: '#f87171' }}>
               Ação Necessária
-            </div>
+            </span>
           ) : (
-            <div className="badge badge-success">
+            <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--font-semibold)', color: 'var(--status-success)' }}>
               Estoque Saudável
-            </div>
+            </span>
           )}
         </div>
 
@@ -416,18 +477,23 @@ const Dashboard: React.FC = () => {
                 {outOfStock}
               </div>
             </div>
-            <div className="icon-container-warning">
+            <div style={{
+              padding: 'var(--space-3)',
+              borderRadius: 'var(--radius-lg)',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
+              color: '#fbbf24'
+            }}>
               <Package size={20} />
             </div>
           </div>
           {outOfStock > 0 ? (
-            <div className="badge badge-warning">
+            <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--font-semibold)', color: '#fbbf24' }}>
               Reposição Urgente
-            </div>
+            </span>
           ) : (
-            <div className="badge badge-success">
+            <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--font-semibold)', color: 'var(--status-success)' }}>
               Tudo em ordem
-            </div>
+            </span>
           )}
         </div>
       </div>

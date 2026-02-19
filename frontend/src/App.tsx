@@ -1,20 +1,23 @@
+import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
-import Dashboard from './pages/Dashboard';
-import CadastroProduto from './pages/CadastroProduto';
-import SaidaEstoque from './pages/SaidaEstoque';
-import HistoricoSaidas from './pages/HistoricoSaidas';
-import ControleEstoque from './pages/ControleEstoque';
-import Relatorios from './pages/Relatorios';
-import Settings from './pages/Settings';
-import LogsAdmin from './pages/LogsAdmin';
-import SetupProfile from './pages/SetupProfile';
 import Login from './pages/Login';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Lazy loading de páginas - carrega sob demanda
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const CadastroProduto = React.lazy(() => import('./pages/CadastroProduto'));
+const SaidaEstoque = React.lazy(() => import('./pages/SaidaEstoque'));
+const HistoricoSaidas = React.lazy(() => import('./pages/HistoricoSaidas'));
+const ControleEstoque = React.lazy(() => import('./pages/ControleEstoque'));
+const Relatorios = React.lazy(() => import('./pages/Relatorios'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+const LogsAdmin = React.lazy(() => import('./pages/LogsAdmin'));
+const SetupProfile = React.lazy(() => import('./pages/SetupProfile'));
 
 // Componente para rotas protegidas
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -53,31 +56,43 @@ function App() {
           pauseOnHover
           aria-label="Notificações"
         />
-        <Routes>
-          <Route path="/login" element={<Login />} />
+        <Suspense fallback={
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            color: 'var(--text-muted)',
+            fontSize: 'var(--text-sm)'
+          }}>
+            Carregando...
+          </div>
+        }>
+          <Routes>
+            <Route path="/login" element={<Login />} />
 
-          {/* Rota Protegida de Setup - Separate from main layout to avoid sidebar */}
-          <Route path="/setup-profile" element={
-            <PrivateRoute>
-              <SetupProfile />
-            </PrivateRoute>
-          } />
+            <Route path="/setup-profile" element={
+              <PrivateRoute>
+                <SetupProfile />
+              </PrivateRoute>
+            } />
 
-          <Route path="/" element={
-            <PrivateRoute>
-              <Layout />
-            </PrivateRoute>
-          }>
-            <Route index element={<Dashboard />} />
-            <Route path="cadastrar" element={<CadastroProduto />} />
-            <Route path="saida" element={<SaidaEstoque />} />
-            <Route path="historico-saidas" element={<HistoricoSaidas />} />
-            <Route path="estoque" element={<ControleEstoque />} />
-            <Route path="relatorios" element={<Relatorios />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="admin/logs" element={<LogsAdmin />} />
-          </Route>
-        </Routes>
+            <Route path="/" element={
+              <PrivateRoute>
+                <Layout />
+              </PrivateRoute>
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="cadastrar" element={<CadastroProduto />} />
+              <Route path="saida" element={<SaidaEstoque />} />
+              <Route path="historico-saidas" element={<HistoricoSaidas />} />
+              <Route path="estoque" element={<ControleEstoque />} />
+              <Route path="relatorios" element={<Relatorios />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="admin/logs" element={<LogsAdmin />} />
+            </Route>
+          </Routes>
+        </Suspense>
       </AuthProvider>
     </ThemeProvider>
   );

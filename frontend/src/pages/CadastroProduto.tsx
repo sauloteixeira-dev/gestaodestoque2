@@ -149,7 +149,7 @@ const CadastroProduto: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowScanner(true)}
-                className="btn-secondary"
+                className="btn-primary"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -219,7 +219,7 @@ const CadastroProduto: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsAddingToExisting(true)}
-                    className="btn-secondary"
+                    className="btn-primary"
                     style={{
                       width: '100%',
                       padding: 'var(--space-3)',

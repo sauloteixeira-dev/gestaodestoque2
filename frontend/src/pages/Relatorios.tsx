@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSaida } from '../context/SaidaContext';
 import { useDevolucao } from '../context/DevolucaoContext';
 import { supabase } from '../lib/supabase';
+import RelatorioConsumo from '../components/RelatorioConsumo';
 
 type MovimentacaoTipo = 'ENTRADA' | 'SAIDA' | 'DEVOLUCAO';
 
@@ -163,6 +164,8 @@ const Relatorios: React.FC = () => {
         <h1 className="page-title">Relatórios</h1>
         <p className="page-subtitle">Histórico completo de movimentações de estoque</p>
       </div>
+
+      <RelatorioConsumo />
 
       {/* Filtros */}
       <div className="tabs-container">

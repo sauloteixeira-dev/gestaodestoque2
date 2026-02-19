@@ -50,17 +50,35 @@ const Estoque: React.FC = () => {
       </div>
 
       {produtoParaExcluir && (
-        <div className="modal-exclusao-overlay">
-          <div className="modal-exclusao">
-            <h3>Confirmar Exclusão</h3>
+        <div className="modal-exclusao-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-exclusao" style={{
+            background: 'var(--bg-primary)',
+            borderRadius: 'var(--radius-lg)',
+            padding: 'var(--space-6)',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
+          }}>
+            <h3 style={{ margin: '0 0 var(--space-3) 0' }}>Confirmar Exclusão</h3>
             <p>Tem certeza que deseja excluir o produto <strong>{produtoParaExcluir.nome}</strong>?</p>
             <p>Esta ação não pode ser desfeita.</p>
-            <div className="modal-botoes">
-              <button onClick={handleCancelarExclusao} className="btn-cancelar">Não</button>
+            <div className="modal-botoes" style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'flex-end', marginTop: 'var(--space-4)' }}>
+              <button onClick={handleCancelarExclusao} className="btn-primary">Não</button>
               <button onClick={() => {
                 excluirProduto(produtoParaExcluir.id);
                 setProdutoParaExcluir(null);
-              }} className="btn-confirmar">Sim</button>
+              }} className="btn-primary" style={{ background: 'var(--status-error)' }}>Sim</button>
             </div>
           </div>
         </div>

@@ -87,6 +87,7 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       const processedData = (data || []).map((saida: any) => ({
         ...saida,
         itens: saida.itens?.map((item: any) => ({
+          produto_id: item.produto_id,
           produto_nome: item.produto?.nome || 'Produto não encontrado',
           produto_codigo_barras: item.produto?.codigo_barras || 'N/A',
           quantidade: item.quantidade,
@@ -109,8 +110,13 @@ export const SaidaProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([fetchLocais(), fetchSaidas()]);
-      setLoading(false);
+      try {
+        await Promise.all([fetchLocais(), fetchSaidas()]);
+      } catch (e) {
+        console.error('[SaidaContext] Erro ao carregar dados:', e);
+      } finally {
+        setLoading(false);
+      }
     };
     loadData();
   }, []);

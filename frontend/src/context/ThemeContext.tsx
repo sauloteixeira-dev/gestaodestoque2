@@ -2,10 +2,21 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Theme = 'dark' | 'light';
 
+interface ThemeColors {
+  primary: string;
+  primaryBg: string;
+}
+
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  colors: ThemeColors;
 }
+
+const THEME_COLORS: ThemeColors = {
+  primary: '#8b5cf6',
+  primaryBg: 'rgba(139, 92, 246, 0.12)',
+};
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -30,7 +41,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, colors: THEME_COLORS }}>
       {children}
     </ThemeContext.Provider>
   );

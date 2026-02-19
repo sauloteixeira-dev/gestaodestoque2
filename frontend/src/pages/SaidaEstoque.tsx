@@ -187,7 +187,7 @@ const SaidaEstoque: React.FC = () => {
                     <button
                       onClick={() => handleQuantidadeChange(produto.id, Math.max(0, (itensSelecionados[produto.id] || 0) - 1))}
                       disabled={(itensSelecionados[produto.id] || 0) === 0}
-                      className="btn-secondary"
+                      className="btn-primary"
                       style={{
                         width: '32px',
                         height: '32px',
@@ -217,7 +217,7 @@ const SaidaEstoque: React.FC = () => {
                     <button
                       onClick={() => handleQuantidadeChange(produto.id, Math.min(produto.quantidade, (itensSelecionados[produto.id] || 0) + 1))}
                       disabled={(itensSelecionados[produto.id] || 0) >= produto.quantidade}
-                      className="btn-secondary"
+                      className="btn-primary"
                       style={{
                         width: '32px',
                         height: '32px',

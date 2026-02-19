@@ -28,7 +28,7 @@ const Layout: React.FC = () => {
         <div className="mobile-header">
           <button
             onClick={toggleSidebar}
-            className="btn-secondary"
+            className="btn-primary"
             style={{ padding: 'var(--space-2) var(--space-3)' }}
           >
             <Menu size={20} />

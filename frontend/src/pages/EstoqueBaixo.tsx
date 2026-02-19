@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'; // Add useEffect
 import { useSearchParams } from 'react-router-dom'; // Add useSearchParams
 import { useProdutos } from '../context/ProdutoContext';
+import { useTheme } from '../context/ThemeContext';
 const brasao = '/images/brasao.png';
 const crasLogo = '/images/cras-logo.png';
 import { AlertTriangle, Printer, Box, CheckCircle } from 'lucide-react'; // Add icons
 
 const EstoqueBaixo: React.FC = () => {
     const { produtos, loading } = useProdutos();
+    const { colors } = useTheme();
     const [searchParams] = useSearchParams();
     const [filtro, setFiltro] = useState<'todos' | 'estoque' | 'critico' | 'baixo'>(() => {
         const filtroUrl = searchParams.get('filtro');
@@ -62,7 +64,7 @@ const EstoqueBaixo: React.FC = () => {
                 <button
                     onClick={() => window.print()}
                     className="btn-primary"
-                    style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}
+                    style={{ background: colors.primary, color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
                     <Printer size={18} />
                     Imprimir Relatório

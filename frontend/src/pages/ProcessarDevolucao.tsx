@@ -199,7 +199,7 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
                             Selecione os itens que não foram entregues
                         </p>
                     </div>
-                    <button onClick={onClose} className="btn-fechar" style={{ fontSize: '24px' }}>✕</button>
+                    <button onClick={onClose} className="btn-primary" style={{ padding: '6px 12px', minWidth: 'auto', fontSize: '24px', lineHeight: 1 }}>✕</button>
                 </div>
 
                 {/* Content */}
@@ -390,7 +390,7 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
                 }}>
                     <button
                         onClick={onClose}
-                        className="btn-secondary"
+                        className="btn-primary"
                         disabled={processando}
                     >
                         Cancelar

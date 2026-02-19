@@ -90,6 +90,11 @@ export const DevolucaoProvider: React.FC<{ children: ReactNode }> = ({ children 
         }
     };
 
+    // Auto-fetch devoluções na montagem
+    useEffect(() => {
+        fetchDevolucoes();
+    }, []);
+
     // Buscar uma devolução específica usando Supabase diretamente
     const buscarDevolucao = async (devolucaoId: number): Promise<Devolucao | null> => {
         try {

@@ -18,6 +18,11 @@
     --space-12: 48px;
     --spacing: 0.25rem;
 
+    /* Sidebar Dimensions */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+    --sidebar-overlap-offset: 16px;
+
     /* Typography */
     --font-sans: Inter, sans-serif;
     --font-mono: Inter, sans-serif;
@@ -227,14 +232,14 @@ body {
 /* --- Layout Grid --- */
 .layout-container {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: var(--sidebar-width) 1fr;
   min-height: 100vh;
   transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (min-width: 769px) {
   .layout-container.collapsed {
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: var(--sidebar-collapsed-width) 1fr;
   }
 }
 
@@ -373,6 +378,27 @@ body {
   padding-top: var(--space-4);
   border-radius: var(--radius-lg);
   transition: background-color var(--transition-fast);
+}
+
+.sidebar-collapse-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-collapse-btn:hover {
+  border-color: var(--border-strong);
+  background-color: var(--hover-bg);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .user-profile:hover {
@@ -738,8 +764,12 @@ td.mono {
 
 /* Tablet breakpoint */
 @media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 200px;
+  }
+
   .layout-container {
-    grid-template-columns: 200px 1fr;
+    grid-template-columns: var(--sidebar-width) 1fr;
   }
 
   .sidebar-logo h2 {
@@ -748,6 +778,10 @@ td.mono {
 
   .nav-item span {
     font-size: var(--text-xs);
+  }
+
+  .sidebar-collapse-btn {
+    left: calc(var(--sidebar-width) - var(--sidebar-overlap-offset)) !important;
   }
 }
 
