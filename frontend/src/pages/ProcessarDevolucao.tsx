@@ -45,9 +45,7 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
         setErro(null);
 
         try {
-            console.log('Validando devolução para saída ID:', saida.id);
             const validacao = await validarDevolucao(saida.id);
-            console.log('Resultado da validação:', validacao);
 
             if (!validacao || !validacao.pode_devolver) {
                 setErro(validacao?.motivo || 'Não é possível processar devolução para esta saída.');
@@ -72,8 +70,6 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
             setItensDisponiveis(itens);
         } catch (error: any) {
             console.error('Erro detalhado ao carregar dados da devolução:', error);
-            setErro(`Erro ao carregar dados: ${error.message || 'Erro de conexão'}`);
-        } finally {
             setLoading(false);
         }
     };

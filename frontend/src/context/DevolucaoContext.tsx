@@ -144,7 +144,7 @@ export const DevolucaoProvider: React.FC<{ children: ReactNode }> = ({ children 
     // Validar possibilidade de devolução usando Supabase diretamente
     const validarDevolucao = async (saidaId: number) => {
         try {
-            console.log('Validando devolução para saída ID:', saidaId);
+
 
             const { data: itensSaida, error: errorItens } = await supabase
                 .from('itens_saida')

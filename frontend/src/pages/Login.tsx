@@ -4,15 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 
-const Login: React.FC = () => {
+const Login: React.FC = (): React.ReactElement => {
   const { supabase } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isLogin, setIsLogin] = useState(true);
-  const [nickname, setNickname] = useState('');
+
   const [error, setError] = useState<string | null>(null);
 
   // Redirecionar para a página que o usuário tentou acessar ou home
@@ -24,54 +23,27 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
-      } else {
-        if (!nickname || nickname.length < 2) {
-          throw new Error('Por favor, insira um nome/apelido válido.');
-        }
-
-        // Signup
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-        if (authError) throw authError;
-
-        // Create profile with nickname
-        if (authData.user) {
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update({ nickname: nickname })
-            .eq('id', authData.user.id);
-
-          if (profileError) {
-            console.error('Erro ao salvar nome:', profileError);
-          }
-        }
-
-        if (authData.user && !authData.session) {
-          alert('Cadastro realizado! Por favor, verifique seu email para confirmar a conta antes de entrar.');
-        } else {
-          alert('Cadastro realizado com sucesso!');
-        }
-      }
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
 
       navigate(from, { replace: true });
-      navigate(from, { replace: true });
-    } catch (err: any) {
+
+    } catch (err: unknown) {
       console.error('Auth Error:', err);
-      let msg = err.message;
-      if (msg.includes('Invalid login credentials')) {
-        msg = 'Email ou senha incorretos.';
-      } else if (msg.includes('Email not confirmed')) {
-        msg = 'Email não confirmado. Verifique sua caixa de entrada.';
+      let msg = 'Falha ao fazer login';
+
+      if (err instanceof Error) {
+        msg = err.message;
+        if (msg.includes('Invalid login credentials')) {
+          msg = 'Email ou senha incorretos.';
+        } else if (msg.includes('Email not confirmed')) {
+          msg = 'Email não confirmado. Verifique sua caixa de entrada.';
+        }
       }
-      setError(msg || `Falha ao ${isLogin ? 'fazer login' : 'criar conta'}`);
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -86,7 +58,7 @@ const Login: React.FC = () => {
               <Lock size={32} color="var(--primary-color)" />
             </div>
           </div>
-          <h1 className="login-title">{isLogin ? 'Acesso Restrito' : 'Criar Conta'}</h1>
+          <h1 className="login-title">Acesso Restrito</h1>
           <p className="login-subtitle">Gestão de Estoque Municipal</p>
         </div>
 
@@ -95,28 +67,6 @@ const Login: React.FC = () => {
             <div className="error-alert">
               <AlertCircle size={18} />
               <span>{error}</span>
-            </div>
-          )}
-
-          {!isLogin && (
-            <div className="form-group">
-              <label htmlFor="nickname">
-                Seu Nome / Apelido <span style={{ color: 'var(--status-error)' }}>*</span>
-              </label>
-              <input
-                id="nickname"
-                type="text"
-                value={nickname}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const formatted = val.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
-                  setNickname(formatted);
-                }}
-                placeholder="Como quer ser chamado"
-                required
-                className="input-with-icon"
-                style={{ paddingLeft: '1rem' }}
-              />
             </div>
           )}
 
@@ -159,20 +109,18 @@ const Login: React.FC = () => {
                 Processando...
               </>
             ) : (
-              isLogin ? 'Entrar no Sistema' : 'Criar Conta'
+              'Entrar no Sistema'
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            style={{
-              background: 'none', border: 'none', color: 'var(--primary-color)',
-              cursor: 'pointer', fontSize: '0.9rem', marginTop: '1rem', width: '100%'
-            }}
+          <a
+            href="https://wa.me/+5535999857170?text=Ol%C3%A1%20Saulo%2C%20Preciso%20de%20acesso%20ao%20App%20de%20gest%C3%A3o%20de%20Estoque%20(STockOS)"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="whatsapp-link"
           >
-            {isLogin ? 'Não tem conta? Cadastre-se' : 'Já tem conta? Entrar'}
-          </button>
+            Precisa de login? Me chame no Whatsapp
+          </a>
         </form>
       </div>
 
@@ -291,6 +239,20 @@ const Login: React.FC = () => {
           align-items: center;
           gap: var(--space-2);
           font-size: var(--font-sm);
+        }
+
+        .whatsapp-link {
+          display: block;
+          text-align: center;
+          color: var(--primary-color);
+          text-decoration: none;
+          font-size: 0.9rem;
+          margin-top: 1rem;
+          width: 100%;
+        }
+
+        .whatsapp-link:hover {
+          text-decoration: underline;
         }
       `}</style>
     </div>
