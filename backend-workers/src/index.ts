@@ -24,7 +24,9 @@ app.use('/*', cors({
         'https://gestao-estoque-five.vercel.app',
         'https://gestao-estoque-git-cloudflare-workers-saulo-teixeiras-projects.vercel.app',
         'https://gestao-estoque-saulo-teixeiras-projects.vercel.app',
-        'https://gestaodestoque2-git-v30-saulo-teixeiras-projects.vercel.app'
+        'https://gestaodestoque2-git-v30-saulo-teixeiras-projects.vercel.app',
+        'https://gestaodestoque2-saulo-teixeiras-projects.vercel.app',
+        'https://gestaodestoque2-git-main-saulo-teixeiras-projects.vercel.app'
     ],
     credentials: true,
 }));
