@@ -68,6 +68,7 @@ const ProcessarDevolucao: React.FC<ProcessarDevolucaoProps> = ({ saida, onClose,
             }));
 
             setItensDisponiveis(itens);
+            setLoading(false);
         } catch (error: any) {
             console.error('Erro detalhado ao carregar dados da devolução:', error);
             setLoading(false);
