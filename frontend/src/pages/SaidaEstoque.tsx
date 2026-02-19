@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useProdutos } from '../context/ProdutoContext';
 import { useSaida } from '../context/SaidaContext';
 import { useAuth } from '../context/AuthContext';
-import { Package, Minus, Plus, LogOut } from 'lucide-react';
+import { Package, Minus, Plus, LogOut, Camera } from 'lucide-react';
+import BarcodeScanner from '../components/BarcodeScanner';
 
 const SaidaEstoque: React.FC = () => {
   const { produtos } = useProdutos();
@@ -15,6 +16,7 @@ const SaidaEstoque: React.FC = () => {
   const [itensSelecionados, setItensSelecionados] = useState<{ [key: number]: number }>({});
   const [termoBusca, setTermoBusca] = useState('');
   const [ocultarSemEstoque, setOcultarSemEstoque] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   React.useEffect(() => {
     if (profile?.nickname) {
@@ -33,6 +35,17 @@ const SaidaEstoque: React.FC = () => {
       ...prev,
       [produtoId]: quantidade
     }));
+  };
+
+  const handleScan = (code: string) => {
+    setTermoBusca(code);
+    const produto = produtos.find(p => p.codigo_barras === code);
+    if (produto && produto.quantidade > 0) {
+      const qtdAtual = itensSelecionados[produto.id] || 0;
+      if (qtdAtual < produto.quantidade) {
+        handleQuantidadeChange(produto.id, qtdAtual + 1);
+      }
+    }
   };
 
   const handleRegistrarSaida = async () => {
@@ -109,6 +122,23 @@ const SaidaEstoque: React.FC = () => {
                 className="input-field"
                 style={{ flex: 1, marginBottom: 0, minWidth: '150px' }}
               />
+              <button
+                type="button"
+                onClick={() => setShowScanner(true)}
+                className="btn-primary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 'var(--space-2)',
+                  padding: 'var(--space-3)',
+                  whiteSpace: 'nowrap',
+                  height: '44px'
+                }}
+              >
+                <Camera size={18} />
+                Escanear
+              </button>
               <label style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -357,6 +387,14 @@ const SaidaEstoque: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Barcode Scanner Modal */}
+      {showScanner && (
+        <BarcodeScanner
+          onScan={handleScan}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 };

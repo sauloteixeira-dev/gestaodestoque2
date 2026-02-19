@@ -65,12 +65,12 @@ const getSupabase = (c: any) => {
 };
 
 // Rota raiz
-app.get('/', (c) => {
+app.get('/', (c: any) => {
     return c.json({ message: 'API Gestão de Estoque - Cloudflare Workers' });
 });
 
 // Rota para buscar todos os produtos
-app.get('/produtos', async (c) => {
+app.get('/produtos', async (c: any) => {
     const supabase = getSupabase(c);
     try {
         const { data, error } = await supabase
@@ -87,7 +87,7 @@ app.get('/produtos', async (c) => {
 });
 
 // Rota para adicionar um produto ou atualizar a quantidade (Protegida)
-app.post('/produtos', authenticateUser, async (c) => {
+app.post('/produtos', authenticateUser, async (c: any) => {
     const supabase = getSupabase(c);
     const { codigo_barras, nome, quantidade, unidade } = await c.req.json();
     const user = c.get('user');
@@ -134,7 +134,7 @@ app.post('/produtos', authenticateUser, async (c) => {
 });
 
 // Rota para dar baixa no estoque (Protegida)
-app.post('/produtos/saida', authenticateUser, async (c) => {
+app.post('/produtos/saida', authenticateUser, async (c: any) => {
     const supabase = getSupabase(c);
     const { produto_id, quantidade } = await c.req.json();
 
@@ -163,7 +163,7 @@ app.post('/produtos/saida', authenticateUser, async (c) => {
 });
 
 // Rota para excluir um produto (Protegida)
-app.delete('/produtos/:id', authenticateUser, async (c) => {
+app.delete('/produtos/:id', authenticateUser, async (c: any) => {
     const supabase = getSupabase(c);
     const id = c.req.param('id');
     const user = c.get('user');
@@ -212,7 +212,7 @@ app.delete('/produtos/:id', authenticateUser, async (c) => {
 });
 
 // Rota para buscar todos os locais de saída
-app.get('/locais-saida', async (c) => {
+app.get('/locais-saida', async (c: any) => {
     const supabase = getSupabase(c);
     try {
         const { data, error } = await supabase
@@ -229,7 +229,7 @@ app.get('/locais-saida', async (c) => {
 });
 
 // Rota para adicionar um novo local de saída (Protegida)
-app.post('/locais-saida', authenticateUser, async (c) => {
+app.post('/locais-saida', authenticateUser, async (c: any) => {
     const supabase = getSupabase(c);
     const { nome, descricao } = await c.req.json();
 
@@ -252,7 +252,7 @@ app.post('/locais-saida', authenticateUser, async (c) => {
 });
 
 // Rota para registrar uma saída de estoque (Protegida)
-app.post('/saidas-estoque', authenticateUser, async (c) => {
+app.post('/saidas-estoque', authenticateUser, async (c: any) => {
     const supabase = getSupabase(c);
     const { local_id, usuario_retirada, itens, observacoes } = await c.req.json();
     const user = c.get('user');
@@ -312,7 +312,7 @@ app.post('/saidas-estoque', authenticateUser, async (c) => {
 });
 
 // Rota para buscar histórico de saídas
-app.get('/saidas-estoque', async (c) => {
+app.get('/saidas-estoque', async (c: any) => {
     const supabase = getSupabase(c);
     try {
         const { data, error } = await supabase
@@ -334,7 +334,7 @@ app.get('/saidas-estoque', async (c) => {
 });
 
 // Rota para buscar logs de exclusão
-app.get('/logs-exclusao', async (c) => {
+app.get('/logs-exclusao', async (c: any) => {
     const supabase = getSupabase(c);
     try {
         const { data, error } = await supabase
@@ -351,7 +351,7 @@ app.get('/logs-exclusao', async (c) => {
 });
 
 // Rota para entrada de estoque via Nota Fiscal (Lote)
-app.post('/api/entrada-estoque', async (c) => {
+app.post('/api/entrada-estoque', async (c: any) => {
     const supabase = getSupabase(c);
     const { produtos } = await c.req.json();
 
@@ -438,7 +438,7 @@ app.post('/api/entrada-estoque', async (c) => {
 });
 
 // Rota para buscar histórico de entradas
-app.get('/entradas-estoque', async (c) => {
+app.get('/entradas-estoque', async (c: any) => {
     const supabase = getSupabase(c);
     try {
         const { data: entradas, error } = await supabase
@@ -486,7 +486,7 @@ app.get('/entradas-estoque', async (c) => {
 // ===================================================
 
 // Rota para criar uma devolução (Protegida)
-app.post('/devolucoes', authenticateUser, async (c) => {
+app.post('/devolucoes', authenticateUser, async (c: any) => {
     const supabase = getSupabase(c);
     const { saida_id, observacao, itens } = await c.req.json();
     const user = c.get('user');
@@ -638,7 +638,7 @@ app.post('/devolucoes', authenticateUser, async (c) => {
 });
 
 // Rota para listar todas as devoluções
-app.get('/devolucoes', async (c) => {
+app.get('/devolucoes', async (c: any) => {
     const supabase = getSupabase(c);
     try {
         const { data: devolucoes, error } = await supabase
@@ -693,7 +693,7 @@ app.get('/devolucoes', async (c) => {
 });
 
 // Rota para buscar detalhes de uma devolução específica
-app.get('/devolucoes/:id', async (c) => {
+app.get('/devolucoes/:id', async (c: any) => {
     const supabase = getSupabase(c);
     const id = c.req.param('id');
 
@@ -743,7 +743,7 @@ app.get('/devolucoes/:id', async (c) => {
 });
 
 // Rota para validar se uma saída pode ter devolução
-app.get('/saidas-estoque/:id/validar-devolucao', async (c) => {
+app.get('/saidas-estoque/:id/validar-devolucao', async (c: any) => {
     const supabase = getSupabase(c);
     const id = c.req.param('id');
 
