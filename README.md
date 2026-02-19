@@ -66,10 +66,13 @@ O **StockOS** é uma aplicação web fullstack para gerenciamento de estoque ins
 - **Importação de NFe (XML)** 🧪: Upload de XML da Nota Fiscal Eletrônica com extração automática de produtos e registro em lote
 
 ### 📤 Saída de Estoque
-- Seleção múltipla de produtos via código de barras
+- Seleção múltipla de produtos com busca por nome ou código
+- **Scanner de código de barras** integrado (câmera do celular ou leitor USB)
+- Seleção automática do produto ao escanear — incrementa a quantidade com cada leitura
 - Definição de local de destino e responsável pela retirada
 - Validação de estoque disponível em tempo real
-- Geração automática de **Documento de Saída** para impressão
+- Campo de observações opcionais
+- Geração automática de **Documento de Saída** para impressão A4
 
 ### ↩️ Sistema de Devoluções
 - Devoluções parciais ou totais por item
@@ -441,6 +444,11 @@ O schema do banco é gerenciado diretamente no painel do Supabase.
 ---
 
 ## 📝 Changelog
+
+### [3.0.1] - 2026-02-19
+- ✨ **Scanner de código de barras na Saída de Estoque** — escanear um produto agora seleciona e incrementa automaticamente a quantidade
+- 🔧 Correção de erros TypeScript `implicit any` em todos os handlers do backend
+- 🔧 Correção de tipagem nos imports do Hono
 
 ### [3.0.0] - 2026-02-19
 - ✨ Novo **Relatório de Consumo por Local** com paginação automática para impressão A4
