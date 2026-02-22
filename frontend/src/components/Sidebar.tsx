@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, isCollapsed, toggleC
       <aside className={`sidebar ${isOpen ? 'open' : ''} ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-logo">
           <div className="logo-icon" style={{ background: 'transparent', width: '32px', height: '32px' }}>
-            <img src="/logo.svg" alt="STockOS Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="STockOS Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
           <div className="sidebar-logo-text" style={{ flex: 1, lineHeight: 1.2 }}>
             <h2 style={{

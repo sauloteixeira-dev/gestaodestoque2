@@ -55,8 +55,8 @@ const Login: React.FC = (): React.ReactElement => {
       <div className="login-card">
         <div className="login-header">
           <div className="logo-area">
-            <div className="logo-circle" style={{ padding: '8px', background: 'transparent' }}>
-              <img src="/logo.svg" alt="STockOS Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <div className="logo-circle" style={{ padding: '8px', background: '#FFFFFF' }}>
+              <img src="/logo.png" alt="STockOS Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           </div>
           <h1 className="login-title">STockOS</h1>
