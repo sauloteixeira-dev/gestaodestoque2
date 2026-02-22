@@ -55,8 +55,8 @@ const Login: React.FC = (): React.ReactElement => {
       <div className="login-card">
         <div className="login-header">
           <div className="logo-area">
-            <div className="logo-circle" style={{ padding: '8px', background: '#FFFFFF' }}>
-              <img src="/logo.png" alt="STockOS Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            <div className="logo-circle" style={{ padding: '0', background: '#FFFFFF', width: '96px', height: '96px', overflow: 'hidden' }}>
+              <img src="/logo.png" alt="STockOS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           </div>
           <h1 className="login-title">STockOS</h1>
@@ -158,9 +158,9 @@ const Login: React.FC = (): React.ReactElement => {
         }
 
         .logo-circle {
-          width: 64px;
-          height: 64px;
-          border-radius: 50%;
+          width: 96px;
+          height: 96px;
+          border-radius: var(--radius-lg);
           background: var(--bg-secondary);
           display: flex;
           align-items: center;
