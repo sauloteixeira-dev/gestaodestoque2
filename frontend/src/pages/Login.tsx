@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react'; // Usarei MessageCircle provisoriamente caso o lucide-react não tenha a logo específica do WhatsApp
 
 const Login: React.FC = (): React.ReactElement => {
   const { supabase } = useAuth();
@@ -54,12 +55,18 @@ const Login: React.FC = (): React.ReactElement => {
       <div className="login-card">
         <div className="login-header">
           <div className="logo-area">
-            <div className="logo-circle">
-              <Lock size={32} color="var(--primary-color)" />
+            <div className="logo-circle" style={{
+              background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%)',
+              color: 'white',
+              fontSize: '28px',
+              fontWeight: 'bold',
+              letterSpacing: '-1px'
+            }}>
+              SO
             </div>
           </div>
-          <h1 className="login-title">Acesso Restrito</h1>
-          <p className="login-subtitle">Gestão de Estoque Municipal</p>
+          <h1 className="login-title">STockOS</h1>
+          <p className="login-subtitle">by Saulo Teixeira</p>
         </div>
 
         <form onSubmit={handleLogin} className="login-form">
@@ -119,7 +126,8 @@ const Login: React.FC = (): React.ReactElement => {
             rel="noopener noreferrer"
             className="whatsapp-link"
           >
-            Precisa de login? Me chame no Whatsapp
+            <MessageCircle size={18} />
+            <span>Precisa de login? Me chame no Whatsapp</span>
           </a>
         </form>
       </div>
@@ -242,17 +250,21 @@ const Login: React.FC = (): React.ReactElement => {
         }
 
         .whatsapp-link {
-          display: block;
-          text-align: center;
-          color: var(--primary-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--space-2);
+          color: #25D366; /* Cor oficial do WhatsApp */
           text-decoration: none;
           font-size: 0.9rem;
+          font-weight: var(--font-medium);
           margin-top: 1rem;
           width: 100%;
+          transition: opacity 0.2s;
         }
 
         .whatsapp-link:hover {
-          text-decoration: underline;
+          opacity: 0.8;
         }
       `}</style>
     </div>
