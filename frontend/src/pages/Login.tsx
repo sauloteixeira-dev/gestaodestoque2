@@ -160,7 +160,7 @@ const Login: React.FC = (): React.ReactElement => {
         .logo-circle {
           width: 96px;
           height: 96px;
-          border-radius: var(--radius-lg);
+          border-radius: 50%;
           background: var(--bg-secondary);
           display: flex;
           align-items: center;
