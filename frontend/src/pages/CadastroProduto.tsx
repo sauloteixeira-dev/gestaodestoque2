@@ -223,7 +223,8 @@ const CadastroProduto: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: 'var(--space-3)',
-                      borderColor: 'var(--accent-primary)',
+                      backgroundColor: 'transparent',
+                      border: '1px solid var(--accent-primary)',
                       color: 'var(--accent-primary)'
                     }}
                   >
@@ -264,7 +265,10 @@ const CadastroProduto: React.FC = () => {
                         className="btn-primary"
                         style={{
                           padding: '0 var(--space-6)',
-                          whiteSpace: 'nowrap'
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 'var(--space-2)'
                         }}
                       >
                         <Save size={18} />

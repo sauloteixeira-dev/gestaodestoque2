@@ -54,14 +54,22 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       // Registrar Entrada
       if (data) {
-        const { data: { session } } = await supabase.auth.getSession();
+        let userId = null;
+        try {
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          if (!sessionError && session?.user?.id) {
+            userId = session.user.id;
+          }
+        } catch (e) {
+          console.warn('Sessão não disponível para log de entrada:', e);
+        }
 
         const { error: errorLog } = await supabase.from('entradas_estoque').insert({
           produto_id: data.id,
           quantidade: quantidade,
           motivo: 'Entrada Inicial',
           data_entrada: new Date().toISOString(),
-          user_id: session?.user?.id
+          user_id: userId
         });
 
         if (errorLog) console.error('Erro ao inserir log:', errorLog);
@@ -119,7 +127,15 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
 
       if (error) throw error;
 
-      const { data: { session } } = await supabase.auth.getSession();
+      let userId = null;
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (!sessionError && session?.user?.id) {
+          userId = session.user.id;
+        }
+      } catch (e) {
+        console.warn('Sessão não disponível para log de entrada:', e);
+      }
 
       // Registrar Entrada
       const { error: errorLog } = await supabase.from('entradas_estoque').insert({
@@ -127,7 +143,7 @@ export const ProdutoProvider: React.FC<{ children: ReactNode }> = ({ children })
         quantidade: quantidadeEntrada,
         motivo: 'Entrada Manual (Atualização)',
         data_entrada: new Date().toISOString(),
-        user_id: session?.user?.id
+        user_id: userId
       });
 
       if (errorLog) console.error('Erro ao inserir log de entrada (update):', errorLog);
